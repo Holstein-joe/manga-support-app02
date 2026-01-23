@@ -20,6 +20,12 @@ export default function NewProjectPage() {
         addProject({
             title,
             description,
+            concept: {
+                theme: "",
+                emotions: "",
+                keywords: "",
+                note: "",
+            },
         });
 
         router.push("/");
