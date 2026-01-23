@@ -3,6 +3,7 @@ import { Edit, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '../ui/Button';
 import { Project } from '@/types/project';
+export type { Project };
 
 interface ProjectCardProps {
     project: Project;
@@ -18,7 +19,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onEdit, onDel
         "bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500",
     ];
     // Use a simple hash for consistent gradient assigning
-    const gradientIndex = project.id ? (project.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % gradients.length) : 0;
+    const gradientIndex = project.id ? (project.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0) % gradients.length) : 0;
     const gradientClass = gradients[gradientIndex];
 
     return (
