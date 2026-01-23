@@ -1,6 +1,6 @@
 {
   "name": "manga-support-app",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -32,5 +32,6 @@
     "prisma": "^7.2.0",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }
+  },
+  "trigger": "force-deploy-01"
 }
