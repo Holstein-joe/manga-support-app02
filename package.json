@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "DATABASE_URL=\"postgresql://dummy:dummy@localhost:5432/dummy\" prisma generate && next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint"
   },
@@ -33,6 +33,9 @@
     "prisma": "^7.2.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": "20.x"
   },
   "trigger": "force-deploy-01"
 }
