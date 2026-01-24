@@ -43,8 +43,9 @@ export const authOptions: NextAuthOptions = {
     },
     pages: {
         signIn: '/',
-    }
-}
+    },
+    trustHost: true, // Trust proxy headers for HTTPS
+} as NextAuthOptions
 
 const handler = NextAuth(authOptions)
 
