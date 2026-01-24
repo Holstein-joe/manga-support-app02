@@ -1,3 +1,17 @@
+kind: "AppStack"
+schemaVersion: "v1"
 env:
   - variable: DATABASE_URL
     secret: DATABASE_URL
+  - variable: NEXTAUTH_SECRET
+    secret: NEXTAUTH_SECRET
+  - variable: AUTH_SECRET
+    secret: NEXTAUTH_SECRET
+  - variable: NEXTAUTH_URL
+    value: "https://manga-support-app--aozu-c7bf0.asia-east1.hosted.app"
+  - variable: GOOGLE_CLIENT_ID
+    secret: GOOGLE_CLIENT_ID
+  - variable: GOOGLE_CLIENT_SECRET
+    secret: GOOGLE_CLIENT_SECRET
+  - variable: ALLOWED_EMAIL
+    secret: ALLOWED_EMAIL
