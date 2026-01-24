@@ -1,11 +1,28 @@
 import { PrismaClient } from '@prisma/client'
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient }
+const prismaClientSingleton = () => {
+    if (!process.env.DATABASE_URL) {
+        process.env.DATABASE_URL = "postgresql://dummy:dummy@localhost:5432/dummy";
+    }
+    return new PrismaClient()
+}
 
-export const prisma =
-    globalForPrisma.prisma ||
-    new PrismaClient()
+declare global {
+    var prisma: undefined | ReturnType<typeof prismaClientSingleton>
+}
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+// Lazy initialization using a Proxy
+const prismaProxy = new Proxy({} as ReturnType<typeof prismaClientSingleton>, {
+    get(target, prop) {
+        if (!globalThis.prisma) {
+            globalThis.prisma = prismaClientSingleton()
+        }
+        return (globalThis.prisma as any)[prop]
+    },
+})
+
+export default prismaProxy
+
+if (process.env.NODE_ENV !== 'production') globalThis.prisma = undefined // Let it be lazy
 
 
