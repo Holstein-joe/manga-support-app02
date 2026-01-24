@@ -14,6 +14,18 @@ export const authOptions: NextAuthOptions = {
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         }),
     ],
+    useSecureCookies: true,
+    cookies: {
+        sessionToken: {
+            name: `__Secure-next-auth.session-token`,
+            options: {
+                httpOnly: true,
+                sameSite: 'lax',
+                path: '/',
+                secure: true,
+            },
+        },
+    },
     callbacks: {
         signIn: async ({ user }) => {
             const allowedEmail = process.env.ALLOWED_EMAIL;
