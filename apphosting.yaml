@@ -9,6 +9,8 @@ env:
     secret: NEXTAUTH_SECRET
   - variable: NEXTAUTH_URL
     value: "https://manga-support-app--aozu-c7bf0.asia-east1.hosted.app"
+  - variable: NEXTAUTH_URL_INTERNAL
+    value: "https://manga-support-app--aozu-c7bf0.asia-east1.hosted.app"
   - variable: AUTH_TRUST_HOST
     value: "true"
   - variable: GOOGLE_CLIENT_ID
