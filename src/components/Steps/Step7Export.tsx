@@ -1,68 +1,34 @@
+"use client";
+
 import React, { useRef } from 'react';
 import { Project, CharacterItem } from '@/types/project';
-import { Button } from '@/components/ui/Button';
-import { Download, FileText, User } from 'lucide-react';
 import { useCharacters } from '@/hooks/useCharacters';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import { Button } from '@/components/ui/Button';
+import { Printer, FileText, User, BookOpen, Film } from 'lucide-react';
 
 interface Step7ExportProps {
     project: Project;
-    onUpdate: (updates: Partial<Project>) => void;
+    onUpdate: (updatedProject: Project) => void;
 }
 
 export const Step7Export: React.FC<Step7ExportProps> = ({ project }) => {
-    const { characters: globalCharacters } = useCharacters();
-    const printRef = useRef<HTMLDivElement>(null);
+    const { characters: allCharacters, groups } = useCharacters();
 
-    // Resolve characters
-    const linkedIds = project.linkedCharacterIds || [];
-    const linkedCharacters = globalCharacters.filter(c => linkedIds.includes(c.id));
-    const legacyCharacters = project.characters || [];
-    const availableCharacters = [...linkedCharacters, ...legacyCharacters];
+    // プロジェクトに関連付けられたキャラを復元
+    const projectCharacters = (project.linkedCharacterIds || [])
+        .map(id => allCharacters.find(c => c.id === id))
+        .filter((c): c is CharacterItem => !!c);
 
-    const handlePDFExport = async () => {
-        if (!printRef.current) return;
+    // 救済措置: 古いデータ形式のキャラも表示
+    const displayCharacters = projectCharacters.length > 0
+        ? projectCharacters
+        : (project.characters || []);
 
-        try {
-            const canvas = await html2canvas(printRef.current, {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                backgroundColor: '#ffffff'
-            });
-
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
-            });
-
-            const imgWidth = 210;
-            const pageHeight = 297;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            let heightLeft = imgHeight;
-            let position = 0;
-
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-            }
-
-            pdf.save(`${project.title || 'project'}_proposal.pdf`);
-        } catch (error) {
-            console.error('PDF export failed:', error);
-            alert('PDFの出力に失敗しました。');
-        }
+    const handlePrint = () => {
+        window.print();
     };
 
-    // Correctly get all scenes from structureBoard
+    // シーンデータをフラット化して取得
     const allScenes = (project.structureBoard || []).flatMap(group =>
         (group.scenes || []).map(scene => ({
             ...scene,
@@ -71,141 +37,182 @@ export const Step7Export: React.FC<Step7ExportProps> = ({ project }) => {
     );
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold flex items-center gap-2 text-zinc-900 dark:text-zinc-50">
-                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 text-zinc-50 text-sm dark:bg-zinc-100 dark:text-zinc-900">5</span>
-                    完成企画書の出力
-                </h2>
-                <Button size="lg" onClick={handlePDFExport} className="px-6 font-bold">
-                    <Download className="mr-2 h-4 w-4" />
-                    企画書をPDF出力
+        <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+            {/* --- ツールバー (印刷時には消える) --- */}
+            <div className="bg-zinc-100 dark:bg-zinc-900 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-4 print:hidden">
+                <div>
+                    <h2 className="text-xl font-bold flex items-center gap-2 text-zinc-900 dark:text-zinc-50">
+                        <span className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 text-zinc-50 text-sm dark:bg-zinc-100 dark:text-zinc-900">6</span>
+                        企画書出力
+                    </h2>
+                    <p className="text-zinc-500 dark:text-zinc-400 text-xs">
+                        下のボタンを押すと、このページを印刷またはPDFとして保存できます。
+                    </p>
+                </div>
+                <Button onClick={handlePrint} className="font-bold px-6 rounded-full shadow-lg">
+                    <Printer size={18} className="mr-2" />
+                    印刷 / PDF保存
                 </Button>
             </div>
 
-            <div className="bg-zinc-100 p-8 rounded-xl overflow-auto dark:bg-zinc-900/50">
-                <div
-                    ref={printRef}
-                    className="bg-white text-zinc-900 p-[20mm] mx-auto shadow-lg max-w-[210mm] min-h-[297mm] box-border"
-                    style={{ fontFamily: '"Yu Mincho", "Hiragino Mincho ProN", serif' }}
-                >
-                    {/* Header */}
-                    <div className="border-b-2 border-zinc-900 pb-6 mb-8 text-center">
-                        <p className="text-sm text-zinc-500 mb-2">漫画制作企画書</p>
-                        <h1 className="text-3xl font-bold mb-4">{project.title || '（タイトル未定）'}</h1>
-                        <p className="text-zinc-600 whitespace-pre-wrap">{project.description || ''}</p>
+            {/* --- 企画書本体 (A4風レイアウト) --- */}
+            <div className="print-container bg-white text-black p-8 md:p-16 rounded-sm shadow-2xl min-h-[297mm] relative overflow-hidden">
+                {/* 印刷用スタイル (このコンポーネント内限定) */}
+                <style jsx global>{`
+                    @media print {
+                        @page { size: A4; margin: 0; }
+                        body { background: white; }
+                        /* アプリのサイドバーやヘッダーを隠す */
+                        aside, header, nav, .print\:hidden { display: none !important; }
+                        /* メインコンテンツをリセット */
+                        main { margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: none !important; }
+                        /* 企画書エリアを表示 */
+                        .print-container {
+                            width: 100%;
+                            margin: 0;
+                            padding: 20mm;
+                            box-shadow: none;
+                            border: none;
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            visibility: visible;
+                        }
+                        /* 改ページ制御 */
+                        .page-break { page-break-before: always; }
+                        .keep-together { break-inside: avoid; }
+                    }
+                `}</style>
+
+                {/* --- 1. 表紙・基本情報 --- */}
+                <section className="mb-16 border-b-4 border-black pb-8">
+                    <div className="text-sm font-bold tracking-widest text-zinc-500 uppercase mb-2">Project Proposal</div>
+                    <h1 className="text-5xl font-black mb-6 leading-tight">{project.title || '無題のプロジェクト'}</h1>
+                    <p className="text-xl font-medium leading-relaxed text-zinc-700 whitespace-pre-wrap">
+                        {project.description || 'ログライン（一行あらすじ）が入力されていません。'}
+                    </p>
+                    <div className="mt-8 flex gap-4 text-sm text-zinc-500">
+                        <span>最終更新: {new Date(project.lastEdited).toLocaleDateString()}</span>
+                    </div>
+                </section>
+
+                {/* --- 2. コンセプト --- */}
+                <section className="mb-12 keep-together">
+                    <h3 className="text-2xl font-bold border-l-8 border-black pl-4 mb-6 flex items-center gap-2">
+                        <BookOpen size={24} /> 企画コンセプト
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-zinc-50 p-6 rounded-lg border border-zinc-100">
+                            <h4 className="font-bold text-zinc-400 text-xs uppercase mb-2">テーマ (Theme)</h4>
+                            <p className="text-lg font-serif font-bold">{project.concept?.theme || '-'}</p>
+                        </div>
+                        <div className="bg-zinc-50 p-6 rounded-lg border border-zinc-100">
+                            <h4 className="font-bold text-zinc-400 text-xs uppercase mb-2">読後感 (Emotion)</h4>
+                            <p className="text-lg">{project.concept?.emotions || '-'}</p>
+                        </div>
+
+                    </div>
+                </section>
+
+                {/* --- 3. キャラクター --- */}
+                <section className="mb-12">
+                    <h3 className="text-2xl font-bold border-l-8 border-black pl-4 mb-6 flex items-center gap-2">
+                        <User size={24} /> 主要キャラクター
+                    </h3>
+                    <div className="grid grid-cols-1 gap-6">
+                        {displayCharacters.length > 0 ? (
+                            displayCharacters.map((char) => (
+                                <div key={char.id} className="flex gap-6 p-4 border border-zinc-200 rounded-xl items-start keep-together">
+                                    <div className="w-20 h-20 bg-zinc-100 rounded-full shrink-0 overflow-hidden border border-zinc-200">
+                                        {char.icon ? (
+                                            <img src={char.icon} alt={char.name} className="w-full h-full object-cover grayscale" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-zinc-300">
+                                                <User size={32} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <h4 className="text-lg font-bold">{char.name}</h4>
+
+                                        </div>
+                                        <p className="text-sm text-zinc-700 whitespace-pre-wrap leading-relaxed">
+                                            {char.description || '詳細設定なし'}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-zinc-400 italic">キャラクターが登録されていません。</p>
+                        )}
+                    </div>
+                </section>
+
+                <div className="page-break" />
+
+                {/* --- 4. ストーリー構成 --- */}
+                <section className="mb-12 mt-8">
+                    <h3 className="text-2xl font-bold border-l-8 border-black pl-4 mb-6 flex items-center gap-2">
+                        <Film size={24} /> ストーリーライン
+                    </h3>
+
+                    {/* Outline */}
+                    <div className="grid grid-cols-2 gap-4 mb-8">
+                        <div className="p-4 bg-zinc-50 border-l-4 border-zinc-300">
+                            <span className="block text-xs font-bold text-zinc-400 mb-1">START</span>
+                            <p className="font-medium text-sm">{project.outline?.start || '-'}</p>
+                        </div>
+                        <div className="p-4 bg-zinc-50 border-l-4 border-zinc-300">
+                            <span className="block text-xs font-bold text-zinc-400 mb-1">GOAL</span>
+                            <p className="font-medium text-sm">{project.outline?.end || '-'}</p>
+                        </div>
                     </div>
 
-                    {/* Characters */}
-                    {availableCharacters.length > 0 && (
-                        <section className="mb-8">
-                            <h3 className="text-lg font-bold border-l-4 border-zinc-900 pl-3 mb-4 bg-zinc-50 py-1">キャラクター設定</h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                {availableCharacters.map(char => (
-                                    <div key={char.id} className="flex gap-4 p-2 border border-zinc-100 rounded">
-                                        <div className="w-12 h-12 rounded-full bg-zinc-50 border border-zinc-200 overflow-hidden shrink-0">
-                                            {char.icon ? (
-                                                <img src={char.icon} alt={char.name} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-zinc-300">
-                                                    <User size={16} />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <div className="font-bold text-sm">{char.name}</div>
-                                            <div className="text-[10px] text-zinc-500 line-clamp-2">{char.description}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )}
+                    {/* Plot / Scenes */}
+                    <div className="space-y-4">
+                        <h4 className="font-bold text-lg mb-4 border-b border-zinc-200 pb-2">シーン構成 (ネーム)</h4>
+                        {allScenes.length > 0 ? (
+                            allScenes.map((scene, index) => (
+                                <div key={scene.id} className="flex gap-4 items-baseline border-b border-zinc-100 pb-3 keep-together">
+                                    <span className="font-mono text-zinc-400 w-8 shrink-0 text-right">#{index + 1}</span>
+                                    <div className="flex-1">
+                                        <div className="mb-1 font-bold text-xs text-zinc-500 uppercase">{scene.groupTitle}</div>
 
-                    {/* Story Structure */}
-                    <section className="mb-8 keep-together">
-                        <h3 className="text-lg font-bold border-l-4 border-zinc-900 pl-3 mb-4 bg-zinc-50 py-1">三幕構成（ビートシート）</h3>
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-12 gap-4 text-sm">
-                                <div className="col-span-3 font-bold text-zinc-400">状況設定 (Act 1)</div>
-                                <div className="col-span-9">ターニングポイント 1: {project.structureBeats?.tp1 || '-'}</div>
-                            </div>
-                            <div className="grid grid-cols-12 gap-4 text-sm">
-                                <div className="col-span-3 font-bold text-zinc-400">葛藤・展開 (Act 2)</div>
-                                <div className="col-span-9 space-y-2">
-                                    <div>中間点 (Midpoint): {project.structureBeats?.midpoint || '-'}</div>
-                                    <div>ターニングポイント 2: {project.structureBeats?.tp2 || '-'}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Plot */}
-                    <section className="mb-8">
-                        <h3 className="text-lg font-bold border-l-4 border-zinc-900 pl-3 mb-4 bg-zinc-50 py-1">プロット（起承転結）</h3>
-                        <div className="space-y-4">
-                            {[
-                                { label: '【起】', content: project.plot?.intro },
-                                { label: '【承】', content: project.plot?.development },
-                                { label: '【転】', content: project.plot?.twist },
-                                { label: '【結】', content: project.plot?.conclusion },
-                            ].map((part, i) => (
-                                <div key={i} className="flex gap-4 text-sm">
-                                    <div className="font-bold text-zinc-500 w-12 shrink-0">{part.label}</div>
-                                    <div className="whitespace-pre-wrap">{part.content || '-'}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-
-                    {/* Scenes with Sketches */}
-                    <section>
-                        <h3 className="text-lg font-bold border-l-4 border-zinc-900 pl-3 mb-4 bg-zinc-50 py-1">ネーム構成（下書き）</h3>
-                        <div className="space-y-8">
-                            {allScenes.map((scene: any, i: number) => (
-                                <div key={scene.id} className="grid grid-cols-12 gap-6 border-b border-zinc-100 pb-6 break-inside-avoid">
-                                    <div className="col-span-1 font-bold text-zinc-300 text-center">{i + 1}</div>
-                                    <div className="col-span-4">
-                                        {scene.drawing ? (
-                                            <div className="bg-zinc-100 rounded border border-zinc-200 aspect-video overflow-hidden">
-                                                <img src={scene.drawing} alt={`Scene ${i + 1}`} className="w-full h-full object-contain" />
-                                            </div>
-                                        ) : (
-                                            <div className="bg-zinc-50 rounded border border-dashed border-zinc-200 aspect-video flex items-center justify-center">
-                                                <span className="text-[10px] text-zinc-400">下書きなし</span>
+                                        {/* 画像がある場合 */}
+                                        {scene.drawing && (
+                                            <div className="mb-2 w-32 h-20 border border-zinc-200 bg-zinc-50 overflow-hidden">
+                                                <img src={scene.drawing} className="w-full h-full object-contain" />
                                             </div>
                                         )}
-                                        <div className="mt-1 text-[9px] text-zinc-400 font-bold uppercase truncate">{scene.groupTitle}</div>
-                                    </div>
-                                    <div className="col-span-7 space-y-3">
-                                        {(scene.dialogues || []).map((dialogue: any) => {
-                                            const char = project.characters?.find(c => c.id === dialogue.characterId);
-                                            return (
-                                                <div key={dialogue.id} className="text-sm flex gap-3">
-                                                    {char?.icon && (
-                                                        <div className="w-8 h-8 rounded-full border border-zinc-100 overflow-hidden shrink-0 mt-1">
-                                                            <img src={char.icon} alt={char.name} className="w-full h-full object-cover" />
-                                                        </div>
-                                                    )}
-                                                    <div className="flex-1">
-                                                        <div className="font-bold text-xs text-zinc-400 mb-0.5">{char?.name || dialogue.character || 'キャラ未設定'}</div>
-                                                        <div className="leading-relaxed">{dialogue.text || '（セリフなし）'}</div>
-                                                        {dialogue.memo && <div className="text-[10px] text-zinc-400 italic mt-0.5">※{dialogue.memo}</div>}
+
+                                        <div className="space-y-1">
+                                            {scene.dialogues?.map((d: any, i: number) => {
+                                                const char = displayCharacters.find(c => c.id === d.characterId);
+                                                return (
+                                                    <div key={i} className="text-sm flex gap-2">
+                                                        <span className="font-bold text-zinc-600 shrink-0 text-xs w-16 truncate">
+                                                            {char?.name || d.character || '???'}
+                                                        </span>
+                                                        <span className="text-zinc-800">「{d.text}」</span>
                                                     </div>
-                                                </div>
-                                            );
-                                        })}
-                                        {(!scene.dialogues || scene.dialogues.length === 0) && (
-                                            <p className="text-zinc-300 text-xs italic">セリフ設定なし</p>
-                                        )}
+                                                )
+                                            })}
+                                        </div>
                                     </div>
                                 </div>
-                            ))}
-                            {allScenes.length === 0 && (
-                                <p className="text-zinc-400 text-sm">ネーム構成はまだ作成されていません。ステップ4を確認してください。</p>
-                            )}
-                        </div>
-                    </section>
+                            ))
+                        ) : (
+                            <p className="text-zinc-400 italic">シーンが作成されていません。</p>
+                        )}
+                    </div>
+                </section>
+
+                {/* フッター */}
+                <div className="mt-20 pt-8 border-t border-zinc-200 text-center text-zinc-400 text-xs flex justify-between items-center">
+                    <span>Generated by Manga Support App</span>
+                    <span>{new Date().toLocaleDateString()} 出力</span>
                 </div>
             </div>
         </div>

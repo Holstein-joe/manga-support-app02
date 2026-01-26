@@ -43,7 +43,7 @@ export const StepCharacterList: React.FC<StepCharacterListProps> = ({ project, o
                 <div>
                     <h2 className="text-xl font-bold flex items-center gap-2 text-white">
                         <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-zinc-900 text-sm">4</span>
-                        登場キャラクターの選択
+                        キャラクター選択
                     </h2>
                     <p className="text-sm text-zinc-500 mt-1">
                         この作品に登場させるキャラクターを名簿から選択します。

@@ -270,7 +270,7 @@ export const Step3Structure: React.FC<Step3StructureProps> = ({ project, onUpdat
                 <div className="flex items-center justify-between">
                     <h2 className="text-xl font-bold flex items-center gap-2 text-zinc-900 dark:text-zinc-50">
                         <span className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 text-zinc-50 text-sm dark:bg-zinc-100 dark:text-zinc-900">3</span>
-                        構造設計ボード (Structure)
+                        構造設計 (三幕構成)
                     </h2>
                 </div>
 

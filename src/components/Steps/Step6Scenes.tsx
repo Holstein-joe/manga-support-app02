@@ -721,8 +721,8 @@ export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, onUpdate }) =
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
             <div>
                 <h2 className="text-2xl font-black flex items-center gap-3 text-white">
-                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-zinc-900 text-sm">4</span>
-                    ネーム制作 (Storyboard)
+                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-zinc-900 text-sm">5</span>
+                    ネーム制作 (下書き)
                 </h2>
                 <p className="text-zinc-500 text-sm mt-2 font-medium tracking-wide">
                     エピソードをコマ（パネル）に落とし込み、セリフや演出を細かく構築します。

@@ -40,7 +40,7 @@ export const Step2Outline: React.FC<Step2OutlineProps> = ({ project, onUpdate })
             <div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm dark:bg-zinc-950 dark:border-zinc-800">
                 <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-zinc-900 dark:text-zinc-50">
                     <span className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 text-zinc-50 text-sm dark:bg-zinc-100 dark:text-zinc-900">2</span>
-                    全体構成 (Outline)
+                    あらすじ作成
                 </h2>
                 <p className="text-sm text-zinc-500 mb-8 dark:text-zinc-400">
                     物語の骨組みとなる4つのポイントを決めましょう。「開始」と「終了」が変化していることが重要です。

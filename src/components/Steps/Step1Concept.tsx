@@ -42,7 +42,7 @@ export const Step1Concept: React.FC<Step1ConceptProps> = ({ project, onUpdate })
             <div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm dark:bg-zinc-950 dark:border-zinc-800">
                 <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-zinc-900 dark:text-zinc-50">
                     <span className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 text-zinc-50 text-sm dark:bg-zinc-100 dark:text-zinc-900">1</span>
-                    何を描くか決める
+                    企画コンセプト
                 </h2>
 
                 <div className="space-y-6">

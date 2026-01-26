@@ -2,42 +2,69 @@
 
 import { useSession, signIn, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/Button"
-import { LogOut, LogIn } from "lucide-react"
+import { LogOut, LogIn, User } from "lucide-react"
 
-export function UserMenu({ showName = true }: { showName?: boolean }) {
+interface UserMenuProps {
+    showName?: boolean;
+    showLogoutLabel?: boolean;
+}
+
+export function UserMenu({ showName = true, showLogoutLabel = false }: UserMenuProps) {
     const { data: session, status } = useSession()
 
     if (status === "loading") {
-        return <div className="h-8 w-8 rounded-full bg-zinc-200 animate-pulse" />
+        return <div className="h-9 w-24 rounded-lg bg-zinc-800 animate-pulse" />
     }
 
     if (session && session.user) {
         return (
-            <div className="flex items-center gap-3">
-                {showName && (
-                    <div className="text-right hidden sm:block">
-                        <p className="text-xs font-bold text-zinc-900 dark:text-zinc-50 leading-none">
-                            {session.user.name}
-                        </p>
-                        <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 leading-none">
-                            Pro 会員
-                        </p>
+            <div className={`flex items-center gap-3 ${showLogoutLabel ? 'w-full justify-between' : ''}`}>
+                <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="relative h-8 w-8 flex-shrink-0 rounded-full overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center">
+                        {session.user.image ? (
+                            <img
+                                src={session.user.image}
+                                alt={session.user.name || "User"}
+                                className="h-full w-full object-cover"
+                            />
+                        ) : (
+                            <User size={16} className="text-zinc-400" />
+                        )}
                     </div>
-                )}
-                <div className="relative group">
-                    <img
-                        src={session.user.image || ""}
-                        alt={session.user.name || "ユーザー"}
-                        className="h-8 w-8 rounded-full border border-zinc-200 dark:border-zinc-800"
-                    />
-                    <button
+                    {showName && (
+                        <div className="text-left hidden sm:block truncate">
+                            <p className="text-xs font-bold text-zinc-900 dark:text-zinc-50 leading-none truncate max-w-[120px]">
+                                {session.user.name || session.user.email}
+                            </p>
+                            <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 leading-none">
+                                ログイン中
+                            </p>
+                        </div>
+                    )}
+                </div>
+
+                {showLogoutLabel ? (
+                    <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => signOut()}
-                        className="absolute top-0 right-0 h-full w-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center text-white"
+                        className="text-zinc-500 hover:text-red-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors gap-2"
                         title="ログアウト"
                     >
-                        <LogOut size={14} />
-                    </button>
-                </div>
+                        <LogOut size={16} />
+                        <span className="text-xs">ログアウト</span>
+                    </Button>
+                ) : (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => signOut()}
+                        className="h-8 w-8 p-0 rounded-full text-zinc-500 hover:text-red-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex-shrink-0"
+                        title="ログアウト"
+                    >
+                        <LogOut size={16} />
+                    </Button>
+                )}
             </div>
         )
     }
@@ -47,7 +74,7 @@ export function UserMenu({ showName = true }: { showName?: boolean }) {
             variant="outline"
             size="sm"
             onClick={() => signIn("google")}
-            className="gap-2 text-[10px] font-black uppercase tracking-widest h-9 px-4"
+            className="gap-2 text-[10px] font-bold uppercase tracking-wide h-9 px-4 bg-zinc-900 border-zinc-800 text-zinc-100 hover:bg-zinc-800 hover:text-white"
         >
             <LogIn size={14} />
             Googleでログイン

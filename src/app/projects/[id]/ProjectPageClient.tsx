@@ -12,16 +12,18 @@ import { Step3Structure } from "@/components/Steps/Step3Structure";
 import { StepCharacterList } from "@/components/Steps/StepCharacterList";
 import { Step6Scenes } from "@/components/Steps/Step6Scenes";
 import { Step7Export } from "@/components/Steps/Step7Export";
+import { StepSettings } from "@/components/Steps/StepSettings";
 import { UserMenu } from "@/components/UserMenu";
 
 // Sanada Method Steps
 const steps = [
-    { id: '1', label: '1. コンセプト設定', component: Step1Concept },
+    { id: '1', label: '1. 企画コンセプト', component: Step1Concept },
     { id: '2', label: '2. あらすじ作成', component: Step2Outline },
-    { id: '3', label: '3. 構造設計', component: Step3Structure },
-    { id: '4', label: '4. 登場キャラの選択', component: StepCharacterList },
-    { id: '6', label: '5. ネーム制作・下書き', component: Step6Scenes },
+    { id: '3', label: '3. 構造設計 (三幕構成)', component: Step3Structure },
+    { id: '4', label: '4. キャラクター選択', component: StepCharacterList },
+    { id: '6', label: '5. ネーム制作 (下書き)', component: Step6Scenes },
     { id: '7', label: '6. 企画書出力', component: Step7Export },
+    { id: 'settings', label: '設定', component: StepSettings },
 ] as const;
 
 export function ProjectPageClient({ id }: { id: string }) {
@@ -37,13 +39,13 @@ export function ProjectPageClient({ id }: { id: string }) {
     }, [currentStep]);
 
     if (loading) {
-        return <div className="p-8 text-center text-zinc-500">Loading...</div>;
+        return <div className="p-8 text-center text-zinc-500">読み込み中...</div>;
     }
 
     const project = projects.find((p) => p.id === id);
 
     if (!project) {
-        return <div className="p-8 text-center text-zinc-500">Project not found</div>;
+        return <div className="p-8 text-center text-zinc-500">プロジェクトが見つかりません</div>;
     }
 
     const handleUpdate = (updates: Partial<Project>) => {
@@ -71,23 +73,24 @@ export function ProjectPageClient({ id }: { id: string }) {
                         key={step.id}
                         onClick={() => setCurrentStep(step.id)}
                         variant={currentStep === step.id ? "default" : "ghost"}
-                        className={`w-full justify-start text-left ${currentStep === step.id ? "font-bold" : "text-zinc-500 dark:text-zinc-400"}`}
+                        className={`w-full justify-start text-left overflow-hidden ${currentStep === step.id ? "font-bold" : "text-zinc-500 dark:text-zinc-400"}`}
+                        title={step.label}
                     >
-                        <span className="flex-1">{step.label}</span>
-                        {currentStep === step.id && <ChevronRight className="w-4 h-4 opacity-50" />}
+                        <span className="flex-1 truncate">{step.label}</span>
+                        {currentStep === step.id && <ChevronRight className="w-4 h-4 opacity-50 flex-shrink-0 ml-2" />}
                     </Button>
                 ))}
 
                 <div className="pt-8 pb-2 text-[10px] font-black text-zinc-500 uppercase tracking-widest px-4">共通設定</div>
                 <Link href="/characters">
                     <Button variant="ghost" className="w-full justify-start text-left text-zinc-500 dark:text-zinc-400 hover:text-white">
-                        <User className="w-4 h-4 mr-2" />
-                        キャラクター名簿
+                        <User className="w-4 h-4 mr-2 flex-shrink-0" />
+                        <span className="truncate">キャラクター名簿</span>
                     </Button>
                 </Link>
             </nav>
             <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 mt-auto pb-10">
-                <UserMenu showName={true} />
+                <UserMenu showName={true} showLogoutLabel={true} />
             </div>
         </>
     );
