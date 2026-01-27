@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Eraser, Undo2, Redo2 } from 'lucide-react';
 
@@ -17,7 +19,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
-    const [brushSize, setBrushSize] = useState<number>(1); // Default to 'Extra Fine' (AOZU Default)
+    const [brushSize, setBrushSize] = useState<number>(1); // Default to 'Extra Fine'
     const [tool, setTool] = useState<'pen' | 'eraser'>('pen');
 
     // History stacks
@@ -43,7 +45,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
         ctx.lineWidth = brushSize;
-        ctx.strokeStyle = '#ffffff';
+        ctx.strokeStyle = '#000000'; // 黒ペンに変更
         setContext(ctx);
 
         if (initialData) {
@@ -80,6 +82,10 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         if (context) {
             context.lineWidth = brushSize;
             context.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over';
+            // ツール切り替え時にも色を黒に維持
+            if (tool === 'pen') {
+                context.strokeStyle = '#000000';
+            }
         }
     }, [brushSize, tool, context]);
 
@@ -243,20 +249,10 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     ];
 
     return (
-        <div className={`flex flex-col bg-black border border-zinc-800 rounded-lg overflow-hidden w-full ${className}`}>
-            {/* Canvas Render Area */}
+        <div className={`flex flex-col bg-[#0a0a0a] border border-zinc-800 rounded-lg overflow-hidden w-full ${className}`}>
+            {/* Canvas Render Area: 白背景に変更 */}
             <div
-                className="relative w-full aspect-video bg-[#00121e] overflow-hidden touch-none"
-                style={{
-                    backgroundImage: `
-                        linear-gradient(rgba(0, 119, 190, 0.1) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(0, 119, 190, 0.1) 1px, transparent 1px),
-                        linear-gradient(rgba(0, 119, 190, 0.05) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(0, 119, 190, 0.05) 1px, transparent 1px)
-                    `,
-                    backgroundSize: '100px 100px, 100px 100px, 20px 20px, 20px 20px',
-                    backgroundPosition: '-1px -1px, -1px -1px, -1px -1px, -1px -1px'
-                }}
+                className="relative w-full aspect-video bg-white overflow-hidden touch-none"
             >
                 <canvas
                     ref={canvasRef}

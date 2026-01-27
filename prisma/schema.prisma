@@ -60,9 +60,22 @@ model Project {
   id          String   @id @default(uuid())
   title       String
   description String?
-  data        Json     // Stores structureBoard, steps, etc.
+  worldView   String?  @db.Text
+  episodes    Episode[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Episode {
+  id          String   @id @default(uuid())
+  title       String
+  order       Int      @default(0)
+  content     Json?    // Stores concept, outline, structure, scenes, etc.
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastEdited  DateTime @default(now())
 }

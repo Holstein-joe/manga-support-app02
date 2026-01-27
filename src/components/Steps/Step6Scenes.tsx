@@ -1,7 +1,9 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import { Project, SceneItem, DialogueUnit, CharacterItem, CharacterGroup } from '@/types/project';
+import { Project, Episode, SceneItem, DialogueUnit, CharacterItem, CharacterGroup } from '@/types/project';
 import { Button } from '@/components/ui/Button';
-import { Plus, Trash2, GripVertical, MessageSquare, ChevronRight, User } from 'lucide-react';
+import { Plus, Trash2, GripVertical, MessageSquare, ChevronRight, User, StickyNote } from 'lucide-react';
 import { DrawingCanvas } from './DrawingCanvas';
 import { DrawingModal } from './DrawingModal';
 import { useCharacters } from '@/hooks/useCharacters';
@@ -29,8 +31,9 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 interface Step6ScenesProps {
-    project: Project;
-    onUpdate: (updates: Partial<Project>) => void;
+    project: Project; // Kept for global characters if needed
+    episode: Episode; // New: Structure data comes from here
+    onUpdate: (updates: Partial<Episode>) => void; // Update Episode data
 }
 
 const SortableDialogueUnit = (props: {
@@ -75,46 +78,50 @@ const SortableDialogueUnit = (props: {
         zIndex: isDragging ? 50 : 0,
     };
 
+    const [showMemo, setShowMemo] = useState(!!dialogue.memo);
+
     return (
         <div
             ref={setNodeRef}
             style={style}
-            className={`bg-black/20 backdrop-blur-sm border ${isDragging ? 'border-white' : 'border-white/5'} rounded-xl p-4 group/dialogue transition-all hover:bg-black/30 hover:border-white/10`}
+            className={`bg-[#0a0a0a]/50 backdrop-blur-sm border ${isDragging ? 'border-zinc-400' : 'border-zinc-700'} rounded-lg p-3 group/dialogue transition-all hover:bg-zinc-800 hover:border-zinc-600`}
         >
-            <div className="flex items-center gap-3 mb-2">
-                <div {...attributes} {...listeners} className="text-zinc-600 hover:text-white cursor-grab active:cursor-grabbing">
-                    <GripVertical size={12} />
+            <div className="flex items-start gap-3">
+                <div {...attributes} {...listeners} className="text-zinc-400 hover:text-white cursor-grab active:cursor-grabbing mt-2 shrink-0">
+                    <GripVertical size={16} />
                 </div>
 
-                <div className="flex items-center gap-2">
-                    {/* キャラクターアイコン */}
-                    <div className="w-6 h-6 rounded-full bg-zinc-700/50 border border-white/10 overflow-hidden flex items-center justify-center shrink-0">
-                        {selectedChar?.icon ? (
-                            <img src={selectedChar.icon} alt={selectedChar.name} className="w-full h-full object-cover" />
-                        ) : (
-                            <User size={12} className="text-zinc-500" />
-                        )}
-                    </div>
+                <div className="relative w-8 h-8 rounded-full bg-zinc-700 border border-zinc-600 overflow-hidden flex items-center justify-center shrink-0 mt-0.5 group/icon cursor-pointer">
+                    {selectedChar?.icon ? (
+                        <img src={selectedChar.icon} alt={selectedChar.name} className="w-full h-full object-cover" />
+                    ) : (
+                        <User size={16} className="text-zinc-400" />
+                    )}
 
-                    {/* Character Selection */}
-                    {characters && characters.length > 0 ? (
+                    {/* Hidden Select Overlay */}
+                    {characters && characters.length > 0 && (
                         <select
                             value={dialogue.characterId || ''}
-                            onChange={(e) => onUpdate(groupId, panelId, dialogue.id, {
-                                characterId: e.target.value,
-                                character: characters.find((c: CharacterItem) => c.id === e.target.value)?.name || ''
-                            })}
-                            className="bg-zinc-900 border-none text-[10px] font-black uppercase tracking-wider text-white/40 focus:outline-none focus:text-white cursor-pointer hover:text-white transition-colors py-0.5 rounded"
+                            onChange={(e) => {
+                                const newId = e.target.value;
+                                const charName = characters.find((c: CharacterItem) => c.id === newId)?.name || '';
+                                onUpdate(groupId, panelId, dialogue.id, {
+                                    characterId: newId,
+                                    character: charName // Auto-fill name on selection
+                                });
+                            }}
+                            className="absolute inset-0 opacity-0 cursor-pointer text-[16px] w-full h-full"
+                            title="キャラクターを選択"
                         >
-                            <option value="" className="bg-zinc-900 text-zinc-500">配役を選択</option>
+                            <option value="">キャラクター選択解除</option>
                             {groups && groups.length > 0 ? (
                                 groups.map(group => {
                                     const groupChars = characters.filter(c => c.groupIds?.includes(group.id));
                                     if (groupChars.length === 0) return null;
                                     return (
-                                        <optgroup key={group.id} label={group.name} className="bg-zinc-900 text-zinc-500 font-bold">
+                                        <optgroup key={group.id} label={group.name}>
                                             {groupChars.map(c => (
-                                                <option key={c.id} value={c.id} className="bg-zinc-900 text-white font-normal">
+                                                <option key={c.id} value={c.id}>
                                                     {c.name}
                                                 </option>
                                             ))}
@@ -123,55 +130,83 @@ const SortableDialogueUnit = (props: {
                                 })
                             ) : (
                                 characters.map((c: CharacterItem) => (
-                                    <option key={c.id} value={c.id} className="bg-zinc-900 text-white">
+                                    <option key={c.id} value={c.id}>
                                         {c.name}
                                     </option>
                                 ))
                             )}
-                            {/* Characters with no group */}
                             {groups && groups.length > 0 && characters.filter(c => !c.groupIds || c.groupIds.length === 0).length > 0 && (
-                                <optgroup label="その他" className="bg-zinc-900 text-zinc-500 font-bold">
+                                <optgroup label="その他">
                                     {characters.filter(c => !c.groupIds || c.groupIds.length === 0).map(c => (
-                                        <option key={c.id} value={c.id} className="bg-zinc-900 text-white font-normal">
+                                        <option key={c.id} value={c.id}>
                                             {c.name}
                                         </option>
                                     ))}
                                 </optgroup>
                             )}
                         </select>
-                    ) : (
-                        <input
-                            value={dialogue.character}
-                            onChange={(e) => onUpdate(groupId, panelId, dialogue.id, { character: e.target.value })}
-                            placeholder="キャラクター名"
-                            className="bg-transparent text-[9px] font-black uppercase tracking-[0.2em] text-white/50 placeholder:text-zinc-700 focus:outline-none w-24"
-                        />
                     )}
                 </div>
 
-                <div className="h-px flex-1 bg-zinc-700/20"></div>
-                <button
-                    onClick={() => onDelete(groupId, panelId, dialogue.id)}
-                    className="opacity-0 group-hover/dialogue:opacity-100 p-1 text-zinc-600 hover:text-white transition-opacity"
-                >
-                    <Trash2 size={12} />
-                </button>
+                <div className="w-28 shrink-0 mt-1">
+                    <input
+                        value={dialogue.character}
+                        onChange={(e) => onUpdate(groupId, panelId, dialogue.id, { character: e.target.value })}
+                        placeholder="名前"
+                        className="bg-transparent text-sm font-bold text-zinc-300 placeholder:text-zinc-500 focus:outline-none w-full border-b border-transparent focus:border-zinc-600 pb-0.5"
+                    />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                    <textarea
+                        value={dialogue.text}
+                        onChange={(e) => onUpdate(groupId, panelId, dialogue.id, { text: e.target.value })}
+                        placeholder="セリフを入力..."
+                        rows={1}
+                        className="w-full bg-transparent text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none resize-none leading-relaxed py-1.5 min-h-[32px]"
+                    />
+
+                    {showMemo && (
+                        <div className="relative mt-1">
+                            <input
+                                value={dialogue.memo}
+                                onChange={(e) => onUpdate(groupId, panelId, dialogue.id, { memo: e.target.value })}
+                                placeholder="演出メモを入力..."
+                                className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded px-2 py-1 text-sm text-zinc-300 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 focus:bg-zinc-900 transition-colors"
+                            />
+                            <button
+                                onClick={() => {
+                                    onUpdate(groupId, panelId, dialogue.id, { memo: '' });
+                                    setShowMemo(false);
+                                }}
+                                className="absolute right-1 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400 p-1"
+                                title="メモを削除して閉じる"
+                            >
+                                <Trash2 size={12} />
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex items-center gap-1 mt-0.5 shrink-0 opacity-0 group-hover/dialogue:opacity-100 transition-opacity">
+                    {!showMemo && (
+                        <button
+                            onClick={() => setShowMemo(true)}
+                            className="p-2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                            title="演出メモを追加"
+                        >
+                            <StickyNote size={16} />
+                        </button>
+                    )}
+                    <button
+                        onClick={() => onDelete(groupId, panelId, dialogue.id)}
+                        className="p-2 text-zinc-500 hover:text-red-400 transition-colors"
+                        title="削除"
+                    >
+                        <Trash2 size={16} />
+                    </button>
+                </div>
             </div>
-
-            <textarea
-                value={dialogue.text}
-                onChange={(e) => onUpdate(groupId, panelId, dialogue.id, { text: e.target.value })}
-                placeholder="セリフの内容..."
-                rows={1}
-                className="w-full bg-transparent text-base text-zinc-100 placeholder:text-zinc-800 focus:outline-none resize-none mb-1 font-medium leading-relaxed"
-            />
-
-            <input
-                value={dialogue.memo}
-                onChange={(e) => onUpdate(groupId, panelId, dialogue.id, { memo: e.target.value })}
-                placeholder="演出メモ / コンテキスト..."
-                className="w-full bg-transparent text-[10px] font-bold text-zinc-600 placeholder:text-zinc-800 focus:outline-none focus:text-zinc-400 transition-colors"
-            />
         </div>
     );
 };
@@ -205,7 +240,6 @@ const SortablePanelCard = ({ item, parentId, activeId, activeType, characters, g
         }
     });
 
-    // Special droppable zone for dialogues to accept items from other panels
     const { setNodeRef: setDialogueDroppableRef, isOver } = useDroppable({
         id: `droppable-dialogue-${item.id}`,
         data: {
@@ -228,24 +262,25 @@ const SortablePanelCard = ({ item, parentId, activeId, activeType, characters, g
             ref={setNodeRef}
             style={style}
             className={`bg-zinc-900 rounded-xl border transition-all duration-200 overflow-hidden flex flex-row items-start w-full relative min-h-[220px] 
-                ${isDragging ? 'border-white shadow-[0_0_40px_rgba(255,255,255,0.15)]' : 'border-zinc-800'}
-                ${isActiveDialogueOver ? 'ring-2 ring-white ring-inset bg-zinc-800/60 shadow-[0_0_30px_rgba(255,255,255,0.05)]' : ''}
+                ${isDragging ? 'border-zinc-400 shadow-xl' : 'border-zinc-800'}
+                ${isActiveDialogueOver ? 'ring-2 ring-zinc-400 ring-inset bg-zinc-800' : ''}
                 group`}
         >
             <button
                 onClick={() => onDeleteItem(parentId, item.id)}
-                className="absolute top-4 right-4 p-2 bg-black/60 border border-white/10 rounded-lg text-zinc-500 hover:text-red-400 hover:border-red-400/50 transition-all z-40 opacity-0 group-hover:opacity-100"
+                className="absolute top-4 right-4 p-2 bg-[#0a0a0a]/80 border border-zinc-700 rounded-lg text-zinc-400 hover:text-red-400 hover:border-red-400 transition-all z-40 opacity-0 group-hover:opacity-100"
                 title="パネルを削除"
             >
                 <Trash2 size={18} />
             </button>
 
+            {/* Canvas Wrapper */}
             <div
-                className="relative w-[320px] flex-shrink-0 flex flex-col items-stretch max-h-fit overflow-hidden cursor-pointer group/canvas"
+                className="relative w-[320px] flex-shrink-0 flex flex-col items-stretch max-h-fit overflow-hidden cursor-pointer group/canvas bg-[#0a0a0a] rounded-lg"
                 onClick={() => onOpenModal(item, parentId)}
             >
-                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/canvas:opacity-100 transition-opacity z-10 flex items-center justify-center">
-                    <span className="bg-black/60 text-white text-[10px] font-bold px-3 py-1.5 rounded-full border border-white/20">タップして全画面で描画</span>
+                <div className="absolute inset-0 bg-[#0a0a0a]/60 opacity-0 group-hover/canvas:opacity-100 transition-opacity z-10 flex items-center justify-center">
+                    <span className="bg-zinc-900 text-white text-sm font-bold px-4 py-2 rounded-full border border-zinc-600 shadow-lg">タップして全画面で描画</span>
                 </div>
                 <DrawingCanvas
                     initialData={item.drawing}
@@ -254,27 +289,27 @@ const SortablePanelCard = ({ item, parentId, activeId, activeType, characters, g
                     showTools={false}
                 />
 
-                <div {...attributes} {...listeners} className="absolute top-3 left-3 p-1.5 bg-black/60 border border-white/20 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-white z-20" onClick={(e) => e.stopPropagation()}>
-                    <GripVertical size={16} />
+                <div {...attributes} {...listeners} className="absolute top-3 left-3 p-2 bg-zinc-900/80 border border-zinc-600 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-white z-20" onClick={(e) => e.stopPropagation()}>
+                    <GripVertical size={18} />
                 </div>
             </div>
 
             <div
                 ref={setDialogueDroppableRef}
-                className={`flex-1 p-6 flex flex-col min-w-0 self-stretch transition-colors ${isActiveDialogueOver ? 'bg-white/5' : 'bg-zinc-900/40'}`}
+                className={`flex-1 p-6 flex flex-col min-w-0 self-stretch transition-colors ${isActiveDialogueOver ? 'bg-zinc-800' : 'bg-zinc-900/40'}`}
             >
                 <div className="flex items-center justify-between mb-4 pr-12">
-                    <div className="flex items-center gap-2 text-white/30">
-                        <MessageSquare size={14} />
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em]">セリフ・演出</span>
+                    <div className="flex items-center gap-2 text-zinc-400">
+                        <MessageSquare size={16} />
+                        <span className="text-sm font-bold">セリフ・演出</span>
                     </div>
                     <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => onAddDialogue(parentId, item.id)}
-                        className="h-7 text-[9px] font-black text-white/40 hover:text-white border border-white/5 hover:border-white/20 px-2"
+                        className="text-sm font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-600 px-3"
                     >
-                        <Plus size={12} className="mr-1" /> ユニット追加
+                        <Plus size={14} className="mr-1.5" /> 追加
                     </Button>
                 </div>
 
@@ -298,9 +333,9 @@ const SortablePanelCard = ({ item, parentId, activeId, activeType, characters, g
                     </SortableContext>
 
                     {(!item.dialogues || item.dialogues.length === 0) && (
-                        <div className={`h-full min-h-[100px] flex items-center justify-center border border-dashed rounded-lg transition-colors ${isActiveDialogueOver ? 'border-white bg-white/5' : 'border-zinc-800'}`}>
-                            <span className="text-[9px] text-zinc-700 font-bold uppercase tracking-[0.1em]">
-                                {isActiveDialogueOver ? 'ドロップして割り当て' : 'セリフなし'}
+                        <div className={`h-full min-h-[100px] flex items-center justify-center border border-dashed rounded-lg transition-colors ${isActiveDialogueOver ? 'border-zinc-500 bg-zinc-800' : 'border-zinc-800'}`}>
+                            <span className="text-sm text-zinc-500 font-bold">
+                                {isActiveDialogueOver ? 'ここにドロップ' : 'セリフがありません'}
                             </span>
                         </div>
                     )}
@@ -333,19 +368,19 @@ const GroupSection = ({ group, activeId, activeType, characters, groups, onAddIt
 
     return (
         <div ref={setNodeRef} className="space-y-8">
-            <div className="flex items-center gap-4">
-                <h3 className="text-sm font-black text-white flex items-center gap-2">
-                    <ChevronRight size={16} className="text-zinc-600" />
+            <div className="flex items-center gap-4 border-b border-zinc-800 pb-2">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <ChevronRight size={20} className="text-zinc-500" />
                     {group.content || '名称未定のエピソード'}
                 </h3>
-                <div className="h-px bg-zinc-800 flex-1"></div>
+                <div className="flex-1"></div>
                 <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => onAddItem(group.id)}
-                    className="h-8 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-white border border-transparent hover:border-white/10 px-3"
+                    className="text-sm font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 px-4"
                 >
-                    <Plus size={14} className="mr-1" /> コマ追加
+                    <Plus size={16} className="mr-1.5" /> パネル追加
                 </Button>
             </div>
 
@@ -376,18 +411,23 @@ const GroupSection = ({ group, activeId, activeType, characters, groups, onAddIt
                 </SortableContext>
 
                 {group.scenes?.length === 0 ? (
-                    <div className="py-20 flex flex-col items-center justify-center border-2 border-dashed border-zinc-900 rounded-3xl opacity-50">
-                        <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em]">パネルがありません</p>
+                    <div className="py-20 flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-3xl opacity-50 hover:opacity-100 transition-opacity">
+                        <p className="text-zinc-500 text-sm font-bold mb-4">パネルがありません</p>
+                        <Button
+                            onClick={() => onAddItem(group.id)}
+                            className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold px-6 py-2 rounded-full"
+                        >
+                            <Plus size={16} className="mr-2" /> 最初の一枚を追加
+                        </Button>
                     </div>
                 ) : (
                     <div className="flex justify-center pt-4">
                         <Button
                             variant="ghost"
-                            size="sm"
                             onClick={() => onAddItem(group.id)}
-                            className="h-10 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-white border border-dashed border-zinc-800 hover:border-white/20 px-8 rounded-xl"
+                            className="text-sm font-bold text-zinc-500 hover:text-white border border-dashed border-zinc-700 hover:border-zinc-500 px-8 py-6 rounded-xl w-full"
                         >
-                            <Plus size={14} className="mr-2" /> コマを追加
+                            <Plus size={16} className="mr-2" /> ここにパネルを追加
                         </Button>
                     </div>
                 )}
@@ -396,16 +436,18 @@ const GroupSection = ({ group, activeId, activeType, characters, groups, onAddIt
     );
 };
 
-export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, onUpdate }) => {
+export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, episode, onUpdate }) => {
     const { characters: globalCharacters, groups: globalGroups } = useCharacters();
 
-    // Resolve characters to use: project-linked ones + legacy ones
-    const linkedIds = project.linkedCharacterIds || [];
+    const linkedIds = episode.linkedCharacterIds || [];
     const linkedCharacters = globalCharacters.filter(c => linkedIds.includes(c.id));
+    // Fallback/Legacy
     const legacyCharacters = project.characters || [];
     const availableCharacters = [...linkedCharacters, ...legacyCharacters];
+    // De-duplicate just in case
+    const uniqueChars = Array.from(new Map(availableCharacters.map(c => [c.id, c])).values());
 
-    const [structure, setStructure] = useState(project.structureBoard || []);
+    const [structure, setStructure] = useState(episode.structureBoard || []);
     const [activeId, setActiveId] = useState<string | null>(null);
     const [activeType, setActiveType] = useState<'panel' | 'dialogue' | null>(null);
 
@@ -416,8 +458,8 @@ export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, onUpdate }) =
     });
 
     useEffect(() => {
-        setStructure(project.structureBoard || []);
-    }, [project.structureBoard]);
+        setStructure(episode.structureBoard || []);
+    }, [episode.structureBoard]);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8, delay: 100 } }),
@@ -426,6 +468,13 @@ export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, onUpdate }) =
 
     const handleOpenModal = (panel: SceneItem, groupId: string) => {
         setModalState({ isOpen: true, panel, groupId });
+    };
+
+    const handleUpdatePanelInModal = (dataUrl: string) => {
+        if (modalState.panel) {
+            handleUpdateItem(modalState.groupId, modalState.panel.id, { drawing: dataUrl });
+            setModalState(prev => ({ ...prev, panel: { ...prev.panel!, drawing: dataUrl } }));
+        }
     };
 
     const handleAddItem = (groupId: string) => {
@@ -455,7 +504,8 @@ export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, onUpdate }) =
             return g;
         });
         setStructure(newStructure);
-        await onUpdate({ structureBoard: newStructure });
+        // await onUpdate({ structureBoard: newStructure }); // Removed await to prevent lag
+        onUpdate({ structureBoard: newStructure });
     };
 
     const handleDeleteItem = (groupId: string, panelId: string) => {
@@ -563,7 +613,6 @@ export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, onUpdate }) =
 
         if (activeData?.type === 'dialogue') {
             const activePanelId = activeData.panelId;
-            // Target can be another dialogue or a dialogue container (panel)
             let overPanelId = '';
             if (overData?.type === 'dialogue') {
                 overPanelId = overData.panelId;
@@ -578,7 +627,6 @@ export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, onUpdate }) =
                     const newStructure = JSON.parse(JSON.stringify(prev));
                     let draggedItem: DialogueUnit | undefined;
 
-                    // Remove from source panel
                     newStructure.forEach((g: any) => {
                         g.scenes?.forEach((s: any) => {
                             if (s.id === activePanelId) {
@@ -591,7 +639,6 @@ export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, onUpdate }) =
                         });
                     });
 
-                    // Add to target panel
                     if (draggedItem) {
                         newStructure.forEach((g: any) => {
                             g.scenes?.forEach((s: any) => {
@@ -603,16 +650,12 @@ export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, onUpdate }) =
                                     } else {
                                         s.dialogues.push(draggedItem);
                                     }
-                                    // Update metadata logic (via ref or state side-effect)
-                                    // dnd-kit uses the data at start, so we must manually track current state
                                 }
                             });
                         });
                     }
                     return newStructure;
                 });
-                // In dnd-kit, handleDragOver is for optimistic visual move
-                // We update active context data manually to track the current panel
                 active.data.current!.panelId = overPanelId;
             }
         } else if (activeData?.type === 'panel') {
@@ -664,7 +707,6 @@ export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, onUpdate }) =
             const overData = over.data.current;
 
             if (activeData?.type === 'dialogue') {
-                // Determine CURRENT panel of both active and over items (as they might have moved in Over)
                 let activePanelId = '';
                 structure.forEach(g => g.scenes?.forEach(s => {
                     if (s.dialogues?.some(d => d.id === active.id)) activePanelId = s.id;
@@ -715,7 +757,7 @@ export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, onUpdate }) =
 
     const allPanels = structure.flatMap(g => g.scenes || []);
     const activePanel = allPanels.find(p => p.id === activeId);
-    const activeDialogue = allPanels.flatMap(p => p.dialogues || []).find(d => d.id === activeId);
+    // const activeDialogue = allPanels.flatMap(p => p.dialogues || []).find(d => d.id === activeId);
 
     return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
@@ -743,7 +785,7 @@ export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, onUpdate }) =
                             group={group}
                             activeId={activeId}
                             activeType={activeType}
-                            characters={availableCharacters}
+                            characters={uniqueChars}
                             groups={globalGroups}
                             onAddItem={handleAddItem}
                             onUpdateItem={handleUpdateItem}
@@ -764,7 +806,7 @@ export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, onUpdate }) =
                                 parentId={findGroup(activeId, 'panel')!}
                                 activeId={null}
                                 activeType={null}
-                                characters={availableCharacters}
+                                characters={uniqueChars}
                                 groups={globalGroups}
                                 onUpdateItem={handleUpdateItem}
                                 onDeleteItem={handleDeleteItem}
@@ -774,25 +816,16 @@ export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, onUpdate }) =
                                 onOpenModal={handleOpenModal}
                             />
                         </div>
-                    ) : activeId && activeType === 'dialogue' && activeDialogue ? (
-                        <div className="w-[300px] shadow-2xl">
-                            <div className="bg-zinc-800 border border-white/40 rounded-lg p-3">
-                                <span className="text-[10px] text-white/40 block mb-1">{activeDialogue.character || 'キャラクター名'}</span>
-                                <p className="text-sm text-white">{activeDialogue.text || 'セリフの内容...'}</p>
-                            </div>
-                        </div>
                     ) : null}
                 </DragOverlay>
             </DndContext>
 
-            {/* Drawing Modal */}
             {modalState.isOpen && modalState.panel && (
                 <DrawingModal
                     isOpen={modalState.isOpen}
-                    onClose={() => setModalState({ ...modalState, isOpen: false })}
+                    onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
                     initialData={modalState.panel.drawing}
-                    onSave={(dataUrl) => handleUpdateItem(modalState.groupId, modalState.panel!.id, { drawing: dataUrl })}
-                    title="下書きの編集"
+                    onSave={handleUpdatePanelInModal}
                 />
             )}
         </div>
