@@ -36,5 +36,8 @@
   "engines": {
     "node": "20.x"
   },
-  "trigger": "force-deploy-01"
+  "trigger": "force-deploy-01",
+  "overrides": {
+    "preact": "$preact"
+  }
 }
