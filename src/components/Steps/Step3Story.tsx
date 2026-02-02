@@ -68,14 +68,14 @@ export const Step3Story: React.FC<Step3StoryProps> = ({ project, onUpdate }) => 
 
                     <div className="space-y-2">
                         <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">話のタイプ（構造）</label>
-                        <p className="text-xs text-zinc-500">主人公がどう変化するか、どんな結末を迎えるか。</p>
+                        <p className="text-sm text-zinc-500">主人公がどう変化するか、どんな結末を迎えるか。</p>
                         <input
                             type="text"
                             value={data.type}
                             onChange={(e) => handleChange('type', e.target.value)}
                             onBlur={handleBlur}
                             placeholder="例：成長譚、復讐劇、謎解き..."
-                            className="w-full p-3 rounded-lg border border-zinc-200 bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900 focus:outline-none transition-all text-zinc-900 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-100 dark:focus:bg-zinc-900"
+                            className="w-full p-3 rounded-lg border border-zinc-200 bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900 focus:outline-none transition-all text-zinc-900 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-100 dark:focus:bg-zinc-900 text-base"
                         />
                     </div>
 
@@ -109,7 +109,7 @@ export const Step3Story: React.FC<Step3StoryProps> = ({ project, onUpdate }) => 
                             onChange={(e) => handleChange('note', e.target.value)}
                             onBlur={handleBlur}
                             rows={4}
-                            className="w-full p-3 rounded-lg border border-zinc-200 bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900 focus:outline-none transition-all text-zinc-900 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-100 dark:focus:bg-zinc-900 resize-none"
+                            className="w-full p-3 rounded-lg border border-zinc-200 bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900 focus:outline-none transition-all text-zinc-900 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-100 dark:focus:bg-zinc-900 resize-none text-base"
                         />
                     </div>
                 </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Plus, Loader2, LogIn } from "lucide-react";
+import { Plus, Loader2, LogIn, Settings } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ProjectGrid } from "@/components/Dashboard/ProjectGrid";
 import { useProjects } from "@/hooks/useProjects";

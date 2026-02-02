@@ -13,7 +13,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     const formattedDate = new Date(project.lastEdited).toLocaleDateString('ja-JP');
 
     return (
-        <div className="group relative flex flex-col rounded-xl border border-zinc-200 bg-white shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 dark:border-zinc-800 dark:bg-zinc-950 overflow-hidden h-full">
+        <div className="group relative flex flex-col rounded-xl border border-zinc-200 bg-white shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 dark:border-zinc-600 dark:hover:border-zinc-500 dark:bg-zinc-950 overflow-hidden h-full">
             <Link href={`/projects/${project.id}`} className="block flex-1 cursor-pointer">
                 <div className="flex flex-1 flex-col p-5">
                     <div className="mb-4">

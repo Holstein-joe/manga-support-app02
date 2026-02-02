@@ -153,7 +153,7 @@ const SortableDialogueUnit = (props: {
                         value={dialogue.character}
                         onChange={(e) => onUpdate(groupId, panelId, dialogue.id, { character: e.target.value })}
                         placeholder="名前"
-                        className="bg-transparent text-sm font-bold text-zinc-300 placeholder:text-zinc-500 focus:outline-none w-full border-b border-transparent focus:border-zinc-600 pb-0.5"
+                        className="bg-transparent text-base font-bold text-zinc-300 placeholder:text-zinc-500 focus:outline-none w-full border-b border-transparent focus:border-zinc-600 pb-0.5"
                     />
                 </div>
 
@@ -163,7 +163,7 @@ const SortableDialogueUnit = (props: {
                         onChange={(e) => onUpdate(groupId, panelId, dialogue.id, { text: e.target.value })}
                         placeholder="セリフを入力..."
                         rows={1}
-                        className="w-full bg-transparent text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none resize-none leading-relaxed py-1.5 min-h-[32px]"
+                        className="w-full bg-transparent text-base text-zinc-100 placeholder:text-zinc-500 focus:outline-none resize-none leading-relaxed py-1.5 min-h-[32px]"
                     />
 
                     {showMemo && (
@@ -172,7 +172,7 @@ const SortableDialogueUnit = (props: {
                                 value={dialogue.memo}
                                 onChange={(e) => onUpdate(groupId, panelId, dialogue.id, { memo: e.target.value })}
                                 placeholder="演出メモを入力..."
-                                className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded px-2 py-1 text-sm text-zinc-300 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 focus:bg-zinc-900 transition-colors"
+                                className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded px-2 py-1 text-base text-zinc-300 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 focus:bg-zinc-900 transition-colors"
                             />
                             <button
                                 onClick={() => {
@@ -261,7 +261,7 @@ const SortablePanelCard = ({ item, parentId, activeId, activeType, characters, g
         <div
             ref={setNodeRef}
             style={style}
-            className={`bg-zinc-900 rounded-xl border transition-all duration-200 overflow-hidden flex flex-row items-start w-full relative min-h-[220px] 
+            className={`bg-zinc-900 rounded-xl border transition-all duration-200 overflow-hidden flex flex-col md:flex-row items-stretch md:items-start w-full relative min-h-[220px] 
                 ${isDragging ? 'border-zinc-400 shadow-xl' : 'border-zinc-800'}
                 ${isActiveDialogueOver ? 'ring-2 ring-zinc-400 ring-inset bg-zinc-800' : ''}
                 group`}
@@ -276,7 +276,7 @@ const SortablePanelCard = ({ item, parentId, activeId, activeType, characters, g
 
             {/* Canvas Wrapper */}
             <div
-                className="relative w-[320px] flex-shrink-0 flex flex-col items-stretch max-h-fit overflow-hidden cursor-pointer group/canvas bg-[#0a0a0a] rounded-lg"
+                className="relative w-full md:w-[320px] flex-shrink-0 flex flex-col items-stretch max-h-fit overflow-hidden cursor-pointer group/canvas bg-[#0a0a0a] rounded-t-lg md:rounded-l-lg md:rounded-tr-none"
                 onClick={() => onOpenModal(item, parentId)}
             >
                 <div className="absolute inset-0 bg-[#0a0a0a]/60 opacity-0 group-hover/canvas:opacity-100 transition-opacity z-10 flex items-center justify-center">
@@ -345,8 +345,14 @@ const SortablePanelCard = ({ item, parentId, activeId, activeType, characters, g
     );
 };
 
+import { TAG_LABELS, TagType } from './Step3Structure';
+
+// ... (existing imports)
+
+// ...
+
 const GroupSection = ({ group, activeId, activeType, characters, groups, onAddItem, onUpdateItem, onDeleteItem, onAddDialogue, onUpdateDialogue, onDeleteDialogue, onOpenModal }: {
-    group: any;
+    group: any; // Ideally typed as structureBoard item
     activeId: string | null;
     activeType: 'panel' | 'dialogue' | null;
     characters?: CharacterItem[];
@@ -371,7 +377,19 @@ const GroupSection = ({ group, activeId, activeType, characters, groups, onAddIt
             <div className="flex items-center gap-4 border-b border-zinc-800 pb-2">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                     <ChevronRight size={20} className="text-zinc-500" />
-                    {group.content || '名称未定のエピソード'}
+                    <span>{group.content || '名称未定のエピソード'}</span>
+                    {group.tags && group.tags.length > 0 && (
+                        <div className="flex gap-1 ml-2">
+                            {group.tags.map((tag: TagType) => (
+                                <span
+                                    key={tag}
+                                    className={`px-1.5 py-0.5 text-sm rounded border font-bold ${TAG_LABELS[tag]?.bg} ${TAG_LABELS[tag]?.color} border-transparent`}
+                                >
+                                    {TAG_LABELS[tag]?.label}
+                                </span>
+                            ))}
+                        </div>
+                    )}
                 </h3>
                 <div className="flex-1"></div>
                 <Button
@@ -779,23 +797,42 @@ export const Step6Scenes: React.FC<Step6ScenesProps> = ({ project, episode, onUp
                 onDragEnd={handleDragEnd}
             >
                 <div className="space-y-20">
-                    {structure.map((group) => (
-                        <GroupSection
-                            key={group.id}
-                            group={group}
-                            activeId={activeId}
-                            activeType={activeType}
-                            characters={uniqueChars}
-                            groups={globalGroups}
-                            onAddItem={handleAddItem}
-                            onUpdateItem={handleUpdateItem}
-                            onDeleteItem={handleDeleteItem}
-                            onAddDialogue={handleAddDialogue}
-                            onUpdateDialogue={handleUpdateDialogue}
-                            onDeleteDialogue={handleDeleteDialogue}
-                            onOpenModal={handleOpenModal}
-                        />
-                    ))}
+                    {structure.length === 0 ? (
+                        <div className="py-20 flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-3xl bg-white/5">
+                            <StickyNote size={48} className="text-zinc-500 mb-4" />
+                            <p className="text-zinc-300 font-bold mb-2">構成データが見つかりません</p>
+                            <p className="text-zinc-400 text-sm text-center leading-relaxed">
+                                Step 3 "構成・構成案" でエピソードの構成を作成してください。<br />
+                                または、データが読み込まれていない可能性があります。
+                            </p>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => window.location.reload()}
+                                className="mt-6 text-sm border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800"
+                            >
+                                ページをリロード
+                            </Button>
+                        </div>
+                    ) : (
+                        structure.map((group) => (
+                            <GroupSection
+                                key={group.id}
+                                group={group}
+                                activeId={activeId}
+                                activeType={activeType}
+                                characters={uniqueChars}
+                                groups={globalGroups}
+                                onAddItem={handleAddItem}
+                                onUpdateItem={handleUpdateItem}
+                                onDeleteItem={handleDeleteItem}
+                                onAddDialogue={handleAddDialogue}
+                                onUpdateDialogue={handleUpdateDialogue}
+                                onDeleteDialogue={handleDeleteDialogue}
+                                onOpenModal={handleOpenModal}
+                            />
+                        ))
+                    )}
                 </div>
 
                 <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.4' } } }) }}>

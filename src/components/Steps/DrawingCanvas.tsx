@@ -37,7 +37,6 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
         // Use desynchronized for lower latency if possible
         const ctx = canvas.getContext('2d', {
-            desynchronized: true,
             alpha: true
         });
         if (!ctx) return;
@@ -336,7 +335,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                         className="flex items-center gap-2 px-4 h-10 bg-zinc-900 border border-white/5 rounded-xl text-zinc-400 hover:bg-red-500 hover:text-white hover:border-red-600 transition-all font-bold"
                     >
                         <Eraser size={14} />
-                        <span className="text-xs">クリア</span>
+                        <span className="text-sm">クリア</span>
                     </button>
                 </div>
             )}

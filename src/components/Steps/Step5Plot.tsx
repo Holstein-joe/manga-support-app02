@@ -50,13 +50,13 @@ export const Step5Plot: React.FC<Step5PlotProps> = ({ project, onUpdate }) => {
                 <div className="relative pl-8 space-y-8 before:absolute before:left-3.5 before:top-4 before:bottom-4 before:w-0.5 before:bg-zinc-200 dark:before:bg-zinc-800">
                     {sections.map(({ key, label, desc }, index) => (
                         <div key={key} className="relative">
-                            <div className="absolute -left-[34px] w-7 h-7 rounded-full bg-white border-2 border-zinc-900 flex items-center justify-center z-10 text-xs font-bold dark:bg-zinc-950 dark:border-zinc-50">
+                            <div className="absolute -left-[34px] w-7 h-7 rounded-full bg-white border-2 border-zinc-900 flex items-center justify-center z-10 text-sm font-bold dark:bg-zinc-950 dark:border-zinc-50">
                                 {index + 1}
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-bold text-zinc-900 dark:text-zinc-50 flex flex-col sm:flex-row sm:justify-between sm:items-center">
                                     {label}
-                                    <span className="text-xs font-normal text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-full dark:bg-zinc-900">{desc}</span>
+                                    <span className="text-sm font-normal text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-full dark:bg-zinc-900">{desc}</span>
                                 </label>
                                 <textarea
                                     value={data[key]}
@@ -64,7 +64,7 @@ export const Step5Plot: React.FC<Step5PlotProps> = ({ project, onUpdate }) => {
                                     onBlur={handleBlur}
                                     rows={5}
                                     placeholder={`${label}の内容を入力...`}
-                                    className="w-full p-4 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900 focus:outline-none transition-all text-zinc-900 shadow-sm dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-100 dark:focus:bg-zinc-900 resize-none"
+                                    className="w-full p-4 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900 focus:outline-none transition-all text-zinc-900 shadow-sm dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-100 dark:focus:bg-zinc-900 resize-none text-base"
                                 />
                             </div>
                         </div>

@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Project } from '@/types/project';
+import { Project, Episode } from '@/types/project';
+
+type ExtendedProject = Project & {
+    concept?: Episode['concept'];
+};
 
 interface Step1ConceptProps {
-    project: Project;
-    onUpdate: (updates: Partial<Project>) => void;
+    project: ExtendedProject;
+    onUpdate: (updates: Partial<ExtendedProject>) => void;
 }
 
 export const Step1Concept: React.FC<Step1ConceptProps> = ({ project, onUpdate }) => {
     // Local state for immediate input feedback
     const [data, setData] = useState({
         theme: project.concept?.theme || '',
+        title: project.title || '',
         emotions: project.concept?.emotions || '',
         keywords: project.concept?.keywords || '',
         note: project.concept?.note || '',
@@ -19,6 +24,7 @@ export const Step1Concept: React.FC<Step1ConceptProps> = ({ project, onUpdate })
     useEffect(() => {
         setData({
             theme: project.concept?.theme || '',
+            title: project.title || '',
             emotions: project.concept?.emotions || '',
             keywords: project.concept?.keywords || '',
             note: project.concept?.note || '',
@@ -34,7 +40,15 @@ export const Step1Concept: React.FC<Step1ConceptProps> = ({ project, onUpdate })
     };
 
     const handleBlur = () => {
-        onUpdate({ concept: data });
+        onUpdate({
+            title: data.title,
+            concept: {
+                theme: data.theme,
+                emotions: data.emotions,
+                keywords: data.keywords,
+                note: data.note
+            }
+        });
     };
 
     return (
@@ -46,12 +60,28 @@ export const Step1Concept: React.FC<Step1ConceptProps> = ({ project, onUpdate })
                 </h2>
 
                 <div className="space-y-6">
+                    {/* Episode Title */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                            エピソードタイトル
+                        </label>
+                        <p className="text-sm text-zinc-500">エピソードの題名を入力してください。</p>
+                        <input
+                            type="text"
+                            value={data.title}
+                            onChange={(e) => handleChange('title', e.target.value)}
+                            onBlur={handleBlur}
+                            placeholder="エピソードタイトルを入力..."
+                            className="w-full p-3 rounded-lg border border-zinc-200 bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900 focus:outline-none transition-all text-zinc-900 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-100 dark:focus:bg-zinc-900 font-bold text-base"
+                        />
+                    </div>
+
                     {/* Theme */}
                     <div className="space-y-2">
                         <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                             テーマ（一言で言うと？）
                         </label>
-                        <p className="text-xs text-zinc-500">例：「友情と犠牲」「AIと人間の共存」など、作品の核となる概念。</p>
+                        <p className="text-sm text-zinc-500">例：「友情と犠牲」「AIと人間の共存」など、作品の核となる概念。</p>
                         <input
                             type="text"
                             value={data.theme}
@@ -67,7 +97,7 @@ export const Step1Concept: React.FC<Step1ConceptProps> = ({ project, onUpdate })
                         <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                             読後感（読者にどう感じてほしい？）
                         </label>
-                        <p className="text-xs text-zinc-500">例：「スカッとする」「ほっこりする」「考えさせられる」</p>
+                        <p className="text-sm text-zinc-500">例：「スカッとする」「ほっこりする」「考えさせられる」</p>
                         <input
                             type="text"
                             value={data.emotions}
@@ -83,14 +113,14 @@ export const Step1Concept: React.FC<Step1ConceptProps> = ({ project, onUpdate })
                         <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                             キーワード（要素・モチーフ）
                         </label>
-                        <p className="text-xs text-zinc-500">例：「魔法学園」「タイムリープ」「猫」「ピアノ」</p>
+                        <p className="text-sm text-zinc-500">例：「魔法学園」「タイムリープ」「猫」「ピアノ」</p>
                         <textarea
                             value={data.keywords}
                             onChange={(e) => handleChange('keywords', e.target.value)}
                             onBlur={handleBlur}
                             rows={2}
                             placeholder="キーワードを列挙..."
-                            className="w-full p-3 rounded-lg border border-zinc-200 bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900 focus:outline-none transition-all text-zinc-900 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-100 resize-none"
+                            className="w-full p-3 rounded-lg border border-zinc-200 bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900 focus:outline-none transition-all text-zinc-900 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-100 dark:focus:bg-zinc-900 resize-none text-base"
                         />
                     </div>
 
@@ -99,14 +129,14 @@ export const Step1Concept: React.FC<Step1ConceptProps> = ({ project, onUpdate })
                         <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                             イメージメモ
                         </label>
-                        <p className="text-xs text-zinc-500">思いついたアイデアやシーン、セリフなどを自由に書き留めてください。</p>
+                        <p className="text-sm text-zinc-500">思いついたアイデアやシーン、セリフなどを自由に書き留めてください。</p>
                         <textarea
                             value={data.note}
                             onChange={(e) => handleChange('note', e.target.value)}
                             onBlur={handleBlur}
                             rows={6}
                             placeholder="自由にメモ..."
-                            className="w-full p-3 rounded-lg border border-zinc-200 bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900 focus:outline-none transition-all text-zinc-900 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-100 resize-none"
+                            className="w-full p-3 rounded-lg border border-zinc-200 bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900 focus:outline-none transition-all text-zinc-900 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-100 dark:focus:bg-zinc-900 resize-none text-base"
                         />
                     </div>
                 </div>

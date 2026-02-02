@@ -39,7 +39,7 @@ export const StepCharacterList: React.FC<StepCharacterListProps> = ({ project, o
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <h2 className="text-xl font-bold flex items-center gap-2 text-white">
                         <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-zinc-900 text-sm">4</span>
@@ -49,14 +49,14 @@ export const StepCharacterList: React.FC<StepCharacterListProps> = ({ project, o
                         この作品に登場させるキャラクターを名簿から選択します。
                     </p>
                 </div>
-                <div className="flex gap-2">
-                    <Link href="/characters">
-                        <Button variant="ghost" className="text-zinc-400 hover:text-white font-bold border border-zinc-800">
+                <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                    <Link href="/characters" className="w-full md:w-auto">
+                        <Button variant="ghost" className="w-full md:w-auto text-zinc-400 hover:text-white font-bold border border-zinc-800">
                             <ExternalLink className="w-4 h-4 mr-2" /> 名簿の編集
                         </Button>
                     </Link>
-                    <Button onClick={() => setIsSelecting(!isSelecting)} className="font-bold bg-white text-zinc-900 hover:bg-zinc-200">
-                        <Plus className="w-4 h-4 mr-2" /> キャラクターを参戦させる
+                    <Button onClick={() => setIsSelecting(!isSelecting)} className="w-full md:w-auto font-bold bg-white text-zinc-900 hover:bg-zinc-200">
+                        <Plus className="w-4 h-4 mr-2" /> キャラクターを参加させる
                     </Button>
                 </div>
             </div>
@@ -78,7 +78,7 @@ export const StepCharacterList: React.FC<StepCharacterListProps> = ({ project, o
                             placeholder="名前で検索、または新規作成して追加..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl pl-10 pr-4 h-12 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-700"
+                            className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl pl-10 pr-4 h-12 text-base focus:outline-none focus:ring-1 focus:ring-zinc-700"
                         />
                     </div>
 
@@ -105,7 +105,7 @@ export const StepCharacterList: React.FC<StepCharacterListProps> = ({ project, o
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="font-bold text-sm truncate">{char.name}</div>
-                                        <div className="text-[10px] opacity-60 truncate">
+                                        <div className="text-sm opacity-60 truncate">
                                             {linkedIds.includes(char.id) ? '参戦中' : '待機中'}
                                         </div>
                                     </div>
@@ -125,7 +125,7 @@ export const StepCharacterList: React.FC<StepCharacterListProps> = ({ project, o
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="font-bold text-sm truncate text-zinc-300">「{searchQuery}」を登録</div>
-                                    <div className="text-[10px]">名簿へ追加してこの作品にリンク</div>
+                                    <div className="text-sm">名簿へ追加してこの作品にリンク</div>
                                 </div>
                             </button>
                         )}
@@ -136,7 +136,7 @@ export const StepCharacterList: React.FC<StepCharacterListProps> = ({ project, o
             {/* Linked Characters Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {linkedCharacters.map((char) => (
-                    <div key={char.id} className="bg-[#1a1a1a] rounded-2xl border border-zinc-800 p-6 flex gap-6 relative group transform transition-all hover:scale-[1.01] hover:border-zinc-600 shadow-xl">
+                    <div key={char.id} className="bg-[#192a31] rounded-2xl border border-zinc-800 p-6 flex gap-6 relative group transform transition-all hover:scale-[1.01] hover:border-zinc-600 shadow-xl">
                         <div className="relative shrink-0">
                             <div className="w-20 h-20 rounded-full bg-black border-2 border-zinc-800 overflow-hidden">
                                 {char.icon ? (
@@ -147,20 +147,20 @@ export const StepCharacterList: React.FC<StepCharacterListProps> = ({ project, o
                                     </div>
                                 )}
                             </div>
-                            <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-white text-black rounded-full flex items-center justify-center border-4 border-[#1a1a1a]">
+                            <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-white text-black rounded-full flex items-center justify-center border-4 border-[#192a31]">
                                 <LinkIcon size={12} />
                             </div>
                         </div>
 
                         <div className="flex-1 space-y-1">
                             <div className="text-xl font-bold text-white">{char.name}</div>
-                            <div className="text-xs text-zinc-500 leading-relaxed line-clamp-2">{char.description || '（説明なし）'}</div>
-                            <span key={char.id + '-link'} className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">リンク中</span>
+                            <div className="text-sm text-zinc-500 leading-relaxed line-clamp-2">{char.description || '（説明なし）'}</div>
+                            <span key={char.id + '-link'} className="text-sm font-black uppercase tracking-widest px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">リンク中</span>
                         </div>
 
                         <button
                             onClick={() => handleToggleLink(char.id)}
-                            className="absolute top-4 right-4 p-2 text-zinc-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all font-bold text-xs flex items-center gap-1"
+                            className="absolute top-4 right-4 p-2 text-zinc-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all font-bold text-sm flex items-center gap-1"
                         >
                             <Trash2 size={14} /> 除外
                         </button>
@@ -169,21 +169,21 @@ export const StepCharacterList: React.FC<StepCharacterListProps> = ({ project, o
 
                 {/* Legacy Characters support */}
                 {localCharacters.map((char) => (
-                    <div key={char.id} className="bg-[#1a1a1a]/50 border-2 border-dashed border-zinc-800 rounded-2xl p-6 flex gap-6 relative group opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
+                    <div key={char.id} className="bg-[#192a31]/50 border-2 border-dashed border-zinc-800 rounded-2xl p-6 flex gap-6 relative group opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
                         <div className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 overflow-hidden flex items-center justify-center text-zinc-700">
                             {char.icon ? <img src={char.icon} alt={char.name} className="w-full h-full object-cover" /> : <User size={32} />}
                         </div>
                         <div className="flex-1">
                             <div className="font-bold text-white">{char.name}</div>
-                            <div className="text-xs text-zinc-600">プロジェクト固有（レガシー）</div>
+                            <div className="text-sm text-zinc-600">プロジェクト固有（レガシー）</div>
                         </div>
                     </div>
                 ))}
 
                 {linkedCharacters.length === 0 && localCharacters.length === 0 && (
-                    <div className="md:col-span-2 py-20 flex flex-col items-center justify-center border-2 border-dashed border-[#1a1a1a] bg-[#1a1a1a]/40 rounded-3xl">
+                    <div className="md:col-span-2 py-20 flex flex-col items-center justify-center border-2 border-dashed border-[#192a31] bg-[#192a31]/40 rounded-3xl">
                         <User className="w-12 h-12 text-zinc-800 mb-4" />
-                        <p className="text-zinc-700 font-bold uppercase tracking-widest text-xs">登場キャラクターが未選択です</p>
+                        <p className="text-zinc-700 font-bold uppercase tracking-widest text-sm">登場キャラクターが未選択です</p>
                         <Button onClick={() => setIsSelecting(true)} variant="ghost" className="mt-4 text-zinc-500 hover:text-white">
                             名簿から選択する
                         </Button>

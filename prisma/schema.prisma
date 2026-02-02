@@ -61,6 +61,8 @@ model Project {
   title       String
   description String?
   worldView   String?  @db.Text
+  themeStructure Json? // Schema for Theme and Story Structure
+  worldStructure Json? // Schema for World Settings (New)
   episodes    Episode[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

@@ -10,45 +10,54 @@ const SEED_DATA: Project[] = [
         title: '魔法使いの弟子と機械仕掛けの街',
         description: '魔法が衰退し、科学が発展した世界。',
         lastEdited: new Date().toISOString(),
-        concept: {
-            theme: '伝統と革新の対立、そして融合',
-            emotions: 'ワクワク感、少しの切なさ、希望',
-            keywords: 'スチームパンク, 魔法, 師弟関係, 冒険',
-            note: 'ビジュアルは錆びついた真鍮と光る魔法陣のコントラスト。'
-        },
-        outline: {
-            start: '魔法が使えず、周囲にバカにされている状態（ゴールの逆）',
-            end: '魔法と科学を融合させ、街の英雄として認められる（ゴール）',
-            midpoint: '師匠がさらわれ、魔法だけでは勝てないと悟る（変化のきっかけ）',
-            decision: '禁忌とされていた「機械との融合」を受け入れ、新しい杖を作る（変化の証明）'
-        },
-        structureBoard: [
+        episodes: [
             {
-                id: 'c1', act: '1', content: '廃材置き場で古代の杖を拾う', tags: ['wakuwaku'],
-                scenes: [
+                id: 'seed-ep-1',
+                projectId: 'seed-1',
+                title: '第1話',
+                order: 1,
+                lastEdited: new Date().toISOString(),
+                concept: {
+                    theme: '伝統と革新の対立、そして融合',
+                    emotions: 'ワクワク感、少しの切なさ、希望',
+                    keywords: 'スチームパンク, 魔法, 師弟関係, 冒険',
+                    note: 'ビジュアルは錆びついた真鍮と光る魔法陣のコントラスト。'
+                },
+                outline: {
+                    start: '魔法が使えず、周囲にバカにされている状態（ゴールの逆）',
+                    end: '魔法と科学を融合させ、街の英雄として認められる（ゴール）',
+                    midpoint: '師匠がさらわれ、魔法だけでは勝てないと悟る（変化のきっかけ）',
+                    decision: '禁忌とされていた「機械との融合」を受け入れ、新しい杖を作る（変化の証明）'
+                },
+                structureBoard: [
                     {
-                        id: 'i1',
-                        drawing: '',
-                        dialogues: [
-                            { id: 'd1', character: 'アルト', text: 'これが...伝説の杖？', memo: '驚きの表情' }
+                        id: 'c1', act: '1', content: '廃材置き場で古代の杖を拾う', tags: ['wakuwaku'],
+                        scenes: [
+                            {
+                                id: 'i1',
+                                drawing: '',
+                                dialogues: [
+                                    { id: 'd1', character: 'アルト', text: 'これが...伝説の杖？', memo: '驚きの表情' }
+                                ]
+                            },
+                            {
+                                id: 'i2',
+                                drawing: '',
+                                dialogues: [
+                                    { id: 'd2', character: '（ト書き）', text: '杖が淡く光り始める。', memo: '足元の廃材が揺れる' }
+                                ]
+                            }
                         ]
                     },
-                    {
-                        id: 'i2',
-                        drawing: '',
-                        dialogues: [
-                            { id: 'd2', character: '（ト書き）', text: '杖が淡く光り始める。', memo: '足元の廃材が揺れる' }
-                        ]
-                    }
+                    { id: 'c2', act: '1', content: '機械兵の襲撃、師匠が捕まる [TP1]', tags: ['vs', 'dokidoki'], scenes: [] },
+                    { id: 'c3', act: '2', content: '機械技師リナとの出会い', tags: ['wakuwaku'], scenes: [] },
+                    { id: 'c4', act: '2', content: '魔法が通じず敗北 [Midpoint]', tags: ['vs', 'bikkuri'], scenes: [] },
+                    { id: 'c5', act: '2', content: 'リナと協力してハイブリッド杖を開発', tags: ['wakuwaku'], scenes: [] },
+                    { id: 'c6', act: '2', content: '敵のアジトへ潜入 [TP2]', tags: ['dokidoki'], scenes: [] },
+                    { id: 'c7', act: '3', content: '長官との最終決戦', tags: ['vs', 'dokidoki'], scenes: [] },
+                    { id: 'c8', act: '3', content: '勝利と新しい時代の幕開け', tags: ['wakuwaku'], scenes: [] }
                 ]
-            },
-            { id: 'c2', act: '1', content: '機械兵の襲撃、師匠が捕まる [TP1]', tags: ['vs', 'dokidoki'], scenes: [] },
-            { id: 'c3', act: '2', content: '機械技師リナとの出会い', tags: ['wakuwaku'], scenes: [] },
-            { id: 'c4', act: '2', content: '魔法が通じず敗北 [Midpoint]', tags: ['vs', 'bikkuri'], scenes: [] },
-            { id: 'c5', act: '2', content: 'リナと協力してハイブリッド杖を開発', tags: ['wakuwaku'], scenes: [] },
-            { id: 'c6', act: '2', content: '敵のアジトへ潜入 [TP2]', tags: ['dokidoki'], scenes: [] },
-            { id: 'c7', act: '3', content: '長官との最終決戦', tags: ['vs', 'dokidoki'], scenes: [] },
-            { id: 'c8', act: '3', content: '勝利と新しい時代の幕開け', tags: ['wakuwaku'], scenes: [] }
+            }
         ]
     }
 ];
@@ -134,7 +143,7 @@ export const useProjects = () => {
     };
 
     // 3. Update Project (with Auto-save debounce)
-    const updateProject = (id: string, updates: Partial<Project>) => {
+    const updateProject = (id: string, updates: Partial<Project>, options?: { localOnly?: boolean }) => {
         setProjects(prev => {
             const updatedProjects = prev.map(p => {
                 if (p.id === id) {
@@ -145,7 +154,7 @@ export const useProjects = () => {
                     };
 
                     // Auto-sync if authenticated
-                    if (status === 'authenticated') {
+                    if (status === 'authenticated' && !options?.localOnly) {
                         if (syncTimeoutRef.current[id]) clearTimeout(syncTimeoutRef.current[id]);
                         syncTimeoutRef.current[id] = setTimeout(async () => {
                             try {
@@ -197,3 +206,58 @@ export const useProjects = () => {
 
     return { projects, loading: loading || status === 'loading', addProject, deleteProject, updateProject };
 };
+
+export function useProject(id: string) {
+    const [project, setProject] = useState<Project | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        if (!id) return;
+        const fetchProject = async () => {
+            try {
+                setLoading(true);
+                // CRITICAL FIX: Add { cache: 'no-store' } to prevent stale data
+                const res = await fetch(`/api/projects/${id}`, { cache: 'no-store' });
+
+                if (!res.ok) throw new Error('Project not found');
+                const data = await res.json();
+                setProject(data);
+            } catch (err) {
+                setError((err as Error).message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProject();
+    }, [id]);
+
+    const mutate = (updatedProject: Project) => {
+        setProject(updatedProject);
+    }
+
+    const updateProject = (updates: Partial<Project>, options?: { localOnly?: boolean }) => {
+        if (!project) return;
+
+        const updatedProject = { ...project, ...updates, lastEdited: new Date().toISOString() };
+        setProject(updatedProject);
+
+        if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+        if (options?.localOnly) return; // Skip cloud save
+
+        syncTimeoutRef.current = setTimeout(async () => {
+            try {
+                await fetch(`/api/projects/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedProject)
+                });
+            } catch (err) {
+                console.error("Auto-save failed", err);
+            }
+        }, 1000);
+    };
+
+    return { project, loading, error, mutate, updateProject };
+}

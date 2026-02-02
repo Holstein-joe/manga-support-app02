@@ -86,6 +86,7 @@ export interface CharacterProfile {
     fashionFormal?: string;
     fashionFavorite?: string;
     accessories?: string;
+    appearanceImages?: string[]; // Gallery images
 
     // --- 4. Social Settings (社会) ---
     // Theme: Socially correct, personally wrong
@@ -162,6 +163,7 @@ export interface CharacterItem {
     description: string;
     icon?: string; // DataURL
     groupIds?: string[]; // IDs of CharacterGroup
+    projectId?: string; // Scope to specific project
     profile?: CharacterProfile; // New detailed profile
 }
 
@@ -212,14 +214,102 @@ export interface Episode {
     linkedCharacterIds?: string[];
 }
 
+// Theme and Story Structure
+export interface ThemeStructure {
+    // Standard Fields
+    topic?: string; // テーマとなる議題
+    symbol?: string; // テーマの象徴となるアイテム
+    interestPoint?: string; // このテーマの面白いポイント
+    message?: string; // 主張したいこと
+    opposingView?: string; // 反対となる意見
+    thirdView?: string; // 第3の意見
+    fourthView?: string; // 第4の意見
+    strengths?: string; // 好きなもの・深い知識
+    concept?: string; // 物語のコンセプト
+    expression?: string; // 表現方法
+    mainProblem?: string; // メインストーリーで解決すべきこと
+    subProblem?: string; // サポートストーリーで解決すべきこと
+    solution?: string; // どうやって解決するのか
+    protagonistChange?: string; // 主人公の変化
+    surroundingChange?: string; // 周囲の変化
+    readerInterest?: string; // 読者が興味を持つポイント
+    emotionalPoint?: string; // 感動するポイント
+
+    // Custom Fields
+    customItems?: { id: string; label: string; value: string }[];
+}
+
+export interface WorldStructure {
+    // Standard Fields
+    era?: string; // 時代
+    worldView?: string; // 世界観
+    stage?: string; // 舞台
+    originalElements?: string; // 王道な要素以外に追加したオリジナル要素
+    gimmicks?: string; // 舞台にしかけられている仕掛け
+    pastIncidents?: string; // 過去に起きた重要な事件の概要
+    terminology?: string; // 設定の用語
+
+    // Custom Fields
+    customItems?: { id: string; label: string; value: string }[];
+}
+
 export interface Project {
     id: string;
     title: string;
     description: string;
     worldView?: string;
+    themeStructure?: ThemeStructure;
+    worldStructure?: WorldStructure; // New Field
+
+    // Structure Data (Now typically on Episode, but kept here for compatibility/export)
+    structureBoard?: {
+        id: string;
+        content: string; // Episode Title
+        act: '1' | '2' | '3';
+        tags?: ('vs' | 'wakuwaku' | 'dokidoki' | 'bikkuri')[];
+        scenes?: SceneItem[]; // Hierarchical Scenes
+    }[];
+    structureBeats?: {
+        tp1: string;
+        midpoint: string;
+        tp2: string;
+    };
+
+    // Story Data (Deprecated/Compat but utilized by new steps)
+    concept?: {
+        theme: string;
+        emotions: string;
+        keywords: string;
+        note: string;
+    };
+    outline?: {
+        start: string;
+        end: string;
+        midpoint: string;
+        decision: string;
+    };
+    story?: {
+        genre: string;
+        type: string;
+        ending: string;
+        note: string;
+    };
+    structure?: {
+        startScene: string;
+        endScene: string;
+        goal: string;
+    };
+    plot?: {
+        intro: string;
+        development: string;
+        twist: string;
+        conclusion: string;
+    };
+
     episodes?: Episode[];
     lastEdited: string;
 
     // Global Settings
     characters?: CharacterItem[]; // Deprecated: Use global pool
+    linkedCharacterIds?: string[];
 }

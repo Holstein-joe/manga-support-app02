@@ -66,29 +66,32 @@ export function EpisodePageClient({ projectId, episodeId }: { projectId: string,
 
     const SidebarContent = () => (
         <>
-            <div className="p-6 border-b border-zinc-100 dark:border-zinc-800">
-                <Link href={`/projects/${projectId}`} className="flex items-center text-xs text-zinc-500 hover:text-zinc-900 mb-4 transition-colors dark:text-zinc-400 dark:hover:text-zinc-50">
+            <div className="p-6 border-b border-zinc-800">
+                <Link href={`/projects/${projectId}`} className="flex items-center text-xs text-zinc-400 hover:text-white mb-4 transition-colors">
                     <ArrowLeft className="w-3 h-3 mr-1" />
                     シリーズ詳細へ戻る
                 </Link>
-                <h1 className="font-bold text-sm text-zinc-500 dark:text-zinc-400 mb-1 truncate">{project.title}</h1>
-                <h2 className="font-bold text-xl text-zinc-900 dark:text-zinc-50 truncate">{episode.title}</h2>
+                <h1 className="font-bold text-sm text-zinc-400 mb-1 truncate">{project.title}</h1>
+                <h2 className="font-bold text-xl text-white truncate">{episode.title}</h2>
             </div>
             <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                 <div className="text-[10px] font-black text-zinc-500 uppercase tracking-widest px-4 mb-2">制作ステップ</div>
                 {steps.map((step) => (
                     <Button
                         key={step.id}
-                        onClick={() => setCurrentStep(step.id)}
+                        onClick={() => {
+                            setCurrentStep(step.id);
+                            setIsSidebarOpen(false);
+                        }}
                         variant={currentStep === step.id ? "default" : "ghost"}
-                        className={`w-full justify-start text-left overflow-hidden ${currentStep === step.id ? "font-bold" : "text-zinc-500 dark:text-zinc-400"}`}
+                        className={`w-full justify-start text-left overflow-hidden ${currentStep === step.id ? "font-bold bg-[#0077BE] text-white hover:bg-[#0077BE]/90" : "text-zinc-400 hover:text-white hover:bg-zinc-800"}`}
                     >
                         <span className="flex-1 truncate">{step.label}</span>
-                        {currentStep === step.id && <ChevronRight className="w-4 h-4 opacity-50 flex-shrink-0 ml-2" />}
+                        {currentStep === step.id && <ChevronRight className="w-4 h-4 opacity-100 flex-shrink-0 ml-2" />}
                     </Button>
                 ))}
             </nav>
-            <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 mt-auto">
+            <div className="p-4 border-t border-zinc-800 mt-auto">
                 <UserMenu showName={true} />
             </div>
         </>
@@ -97,7 +100,7 @@ export function EpisodePageClient({ projectId, episodeId }: { projectId: string,
     return (
         <div className="flex bg-zinc-50 min-h-screen dark:bg-zinc-950">
             {/* Desktop Sidebar */}
-            <aside className="w-64 fixed h-full bg-white border-r border-zinc-200 z-30 hidden md:flex flex-col dark:bg-zinc-925 dark:border-zinc-800">
+            <aside className="w-64 fixed h-full bg-[#253341] border-r border-zinc-800 z-30 hidden md:flex flex-col">
                 <SidebarContent />
             </aside>
 
@@ -105,8 +108,8 @@ export function EpisodePageClient({ projectId, episodeId }: { projectId: string,
             {isSidebarOpen && (
                 <div className="md:hidden fixed inset-0 bg-black/50 z-40 transition-opacity" onClick={() => setIsSidebarOpen(false)} />
             )}
-            <aside className={`md:hidden fixed inset-y-0 left-0 w-72 bg-white z-50 transform transition-transform duration-300 ease-in-out dark:bg-zinc-925 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                <div className="flex flex-col h-full border-r border-zinc-200 dark:border-zinc-800">
+            <aside className={`md:hidden fixed inset-y-0 left-0 w-72 bg-[#253341] z-50 transform transition-transform duration-300 ease-in-out border-r border-zinc-800 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <div className="flex flex-col h-full border-r border-transparent">
                     <SidebarContent />
                 </div>
             </aside>

@@ -28,7 +28,7 @@ interface Step3StructureProps {
     onUpdate: (updates: Partial<Project>) => void;
 }
 
-type TagType = 'vs' | 'wakuwaku' | 'dokidoki' | 'bikkuri';
+export type TagType = 'vs' | 'wakuwaku' | 'dokidoki' | 'bikkuri';
 
 interface CardData {
     id: string;
@@ -37,7 +37,7 @@ interface CardData {
     tags?: TagType[];
 }
 
-const TAG_LABELS: Record<TagType, { label: string; color: string; bg: string }> = {
+export const TAG_LABELS: Record<TagType, { label: string; color: string; bg: string }> = {
     vs: { label: 'VS', color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/30 dark:text-red-400' },
     wakuwaku: { label: 'ワクワク', color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400' },
     dokidoki: { label: 'ドキドキ', color: 'text-purple-600', bg: 'bg-purple-100 dark:bg-purple-900/30 dark:text-purple-400' },
@@ -99,7 +99,7 @@ const SortableCard = ({ card, onDelete, onUpdate, isOverlay = false }: {
                                 key={tag}
                                 onClick={() => toggleTag(tag)}
                                 onMouseDown={(e) => e.stopPropagation()}
-                                className={`px-1.5 py-0.5 text-[10px] rounded border transition-colors ${card.tags?.includes(tag)
+                                className={`px-1.5 py-0.5 text-[11px] rounded border transition-colors ${card.tags?.includes(tag)
                                     ? `${TAG_LABELS[tag].bg} ${TAG_LABELS[tag].color} border-transparent font-bold`
                                     : 'bg-transparent text-zinc-400 border-zinc-200 dark:border-zinc-800 dark:text-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                                     }`}
@@ -283,11 +283,11 @@ export const Step3Structure: React.FC<Step3StructureProps> = ({ project, onUpdat
                                     <h3 className="font-bold text-zinc-900 dark:text-zinc-50">
                                         {act === '1' ? '第一幕: 状況設定・問題提起' : act === '2' ? '第二幕: 対立・葛藤' : '第三幕: 解決'}
                                     </h3>
-                                    <span className="text-[10px] font-black font-mono text-zinc-400 bg-zinc-200/50 px-2 py-0.5 rounded dark:bg-zinc-800">
+                                    <span className="text-sm font-black font-mono text-zinc-400 bg-zinc-200/50 px-2 py-0.5 rounded dark:bg-zinc-800">
                                         {act === '1' ? 'SETUP' : act === '2' ? 'CONFRONTATION' : 'RESOLUTION'}
                                     </span>
                                 </div>
-                                <div className="text-[11px] leading-relaxed text-zinc-600 font-medium">
+                                <div className="text-sm leading-relaxed text-zinc-600 font-medium">
                                     {act === '1' && (
                                         <>
                                             <p className="mb-0.5">物語の舞台は？</p>
@@ -339,43 +339,43 @@ export const Step3Structure: React.FC<Step3StructureProps> = ({ project, onUpdat
                             <div className="p-4 pt-0 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 rounded-b-xl space-y-3">
                                 {act === '1' && (
                                     <div className="mt-3">
-                                        <label className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1.5 block">ターニングポイント 1 (TP1)</label>
+                                        <label className="text-sm font-black text-rose-500 uppercase tracking-widest mb-1.5 block">ターニングポイント 1 (TP1)</label>
                                         <textarea
                                             value={beats.tp1}
                                             onChange={(e) => handleBeatChange('tp1', e.target.value)}
                                             placeholder="物語が大きく動き出す瞬間..."
                                             rows={2}
-                                            className="w-full text-xs p-2.5 rounded-lg border border-zinc-200 bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-rose-500 dark:bg-zinc-950 dark:border-zinc-800 dark:text-white"
+                                            className="w-full text-sm p-2.5 rounded-lg border border-zinc-200 bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-rose-500 dark:bg-zinc-950 dark:border-zinc-800 dark:text-white"
                                         />
                                     </div>
                                 )}
                                 {act === '2' && (
                                     <div className="mt-3 space-y-4">
                                         <div>
-                                            <label className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1.5 block">中間点 (MP)</label>
+                                            <label className="text-sm font-black text-amber-500 uppercase tracking-widest mb-1.5 block">中間点 (MP)</label>
                                             <textarea
                                                 value={beats.midpoint}
                                                 onChange={(e) => handleBeatChange('midpoint', e.target.value)}
                                                 placeholder="物語の折り返し地点..."
                                                 rows={2}
-                                                className="w-full text-xs p-2.5 rounded-lg border border-zinc-200 bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-amber-500 dark:bg-zinc-950 dark:border-zinc-800 dark:text-white"
+                                                className="w-full text-sm p-2.5 rounded-lg border border-zinc-200 bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-amber-500 dark:bg-zinc-950 dark:border-zinc-800 dark:text-white"
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-[10px] font-black text-rose-600 uppercase tracking-widest mb-1.5 block">ターニングポイント 2 (TP2)</label>
+                                            <label className="text-sm font-black text-rose-600 uppercase tracking-widest mb-1.5 block">ターニングポイント 2 (TP2)</label>
                                             <textarea
                                                 value={beats.tp2}
                                                 onChange={(e) => handleBeatChange('tp2', e.target.value)}
                                                 placeholder="クライマックスへの突入..."
                                                 rows={2}
-                                                className="w-full text-xs p-2.5 rounded-lg border border-zinc-200 bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-rose-600 dark:bg-zinc-950 dark:border-zinc-800 dark:text-white"
+                                                className="w-full text-sm p-2.5 rounded-lg border border-zinc-200 bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-rose-600 dark:bg-zinc-950 dark:border-zinc-800 dark:text-white"
                                             />
                                         </div>
                                     </div>
                                 )}
                                 {act === '3' && (
                                     <div className="py-2 text-center">
-                                        <div className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Fin.</div>
+                                        <div className="text-sm font-black text-zinc-400 uppercase tracking-widest">Fin.</div>
                                     </div>
                                 )}
                             </div>

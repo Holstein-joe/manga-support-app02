@@ -2,14 +2,22 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useCharacters } from '@/hooks/useCharacters';
 import { Button } from '@/components/ui/Button';
-import { Plus, User, ArrowLeft, Search, X } from 'lucide-react';
+import { Plus, User, ArrowLeft, Search, X, Trash2, Settings, Users, BookOpen } from 'lucide-react';
+import { useProject } from '@/hooks/useProjects';
+import { UserMenu } from '@/components/UserMenu';
 
-export default function GlobalCharacterPage() {
+export default function ProjectCharacterListPage() {
+    const params = useParams();
+    const projectId = params?.id as string;
     const router = useRouter();
-    const { characters, groups, addCharacter, deleteCharacter, addGroup } = useCharacters();
+
+    // Pass projectId to useCharacters to scope the list
+    const { characters, groups, addCharacter, addGroup, deleteGroup } = useCharacters(projectId);
+    const { project } = useProject(projectId);
+
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
     const [isCreatingGroup, setIsCreatingGroup] = useState(false);
@@ -28,8 +36,8 @@ export default function GlobalCharacterPage() {
             description: '',
             groupIds: selectedGroupId ? [selectedGroupId] : []
         });
-        // Immediately redirect to the new detail page
-        router.push(`/characters/${newChar.id}`);
+        // Redirect to the project-scoped detail page
+        router.push(`/projects/${projectId}/characters/${newChar.id}`);
     };
 
     const handleCreateGroup = (e: React.FormEvent) => {
@@ -41,21 +49,62 @@ export default function GlobalCharacterPage() {
         }
     };
 
+    if (!project) return <div className="p-10 text-center text-zinc-500">Loading project...</div>;
+
     return (
         <div className="min-h-screen bg-zinc-950 text-white p-4 md:p-8">
             <div className="max-w-6xl mx-auto space-y-8">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <Link href="/" className="flex items-center text-sm text-zinc-500 hover:text-white transition-colors mb-2">
-                            <ArrowLeft className="w-4 h-4 mr-1" />
-                            ダッシュボードへ戻る
-                        </Link>
-                        <h1 className="text-3xl font-bold tracking-tight">グローバルキャラクター名簿</h1>
-                        <p className="text-zinc-500 text-sm mt-1">すべての作品で使用できる共通のキャラクターデータベースです。</p>
+                {/* Header */}
+                <div className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800 -mx-4 md:-mx-8 px-4 md:px-8 mb-8">
+                    <div className="max-w-6xl mx-auto h-16 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <Link href="/" className="text-zinc-500 hover:text-white transition-colors">
+                                <ArrowLeft size={20} />
+                            </Link>
+                            <div>
+                                <h1 className="font-bold text-lg">{project.title}</h1>
+                                <p className="text-xs text-zinc-500">シリーズ設定・管理</p>
+                            </div>
+                        </div>
+                        <UserMenu />
                     </div>
-                    <Button onClick={handleCreate} className="bg-white text-black hover:bg-zinc-200 font-bold h-12 px-6 rounded-xl">
-                        <Plus className="w-5 h-5 mr-2" />
+                </div>
+
+                {/* Tabs */}
+                <div className="flex gap-8 border-b border-zinc-800 mb-8">
+                    <Link href={`/projects/${projectId}`}>
+                        <button
+                            className={`pb-4 text-sm font-bold flex items-center gap-2 border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 transition-colors`}
+                        >
+                            <BookOpen size={16} />
+                            エピソード一覧
+                        </button>
+                    </Link>
+                    <button
+                        className={`pb-4 text-sm font-bold flex items-center gap-2 border-b-2 border-white text-white transition-colors`}
+                    >
+                        <Users size={16} />
+                        キャラクター名簿
+                    </button>
+                    <Link href={`/projects/${projectId}`}>
+                        <button
+                            className={`pb-4 text-sm font-bold flex items-center gap-2 border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 transition-colors`}
+                        >
+                            <Settings size={16} />
+                            作品設定 (World)
+                        </button>
+                    </Link>
+                </div>
+
+                {/* Sub-Header (Title + Action) */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 className="text-xl font-bold">キャラクター</h2>
+                        <p className="text-zinc-500 text-sm mt-1">{project.title} の登場人物を管理します。</p>
+                    </div>
+                    <Button onClick={handleCreate} className="bg-white text-black hover:bg-zinc-200 font-bold rounded-full px-6 h-10">
+                        <Plus className="w-4 h-4 mr-2" />
                         新キャラを登録
                     </Button>
                 </div>
@@ -114,6 +163,24 @@ export default function GlobalCharacterPage() {
                                 <Plus size={14} className="mr-2" /> グループを新規作成
                             </Button>
                         )}
+
+                        {/* Delete Group Button - Only if specific group selected */}
+                        {selectedGroupId && (
+                            <div className="flex items-center pl-2 ml-2 border-l border-zinc-800">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        deleteGroup(selectedGroupId);
+                                        setSelectedGroupId(null);
+                                    }}
+                                    className="text-red-500 hover:text-red-400 hover:bg-red-500/10 h-11 px-3 rounded-xl"
+                                    title="このグループを削除"
+                                >
+                                    <Trash2 size={16} />
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -122,7 +189,7 @@ export default function GlobalCharacterPage() {
                     {filteredCharacters.map(char => (
                         <Link
                             key={char.id}
-                            href={`/characters/${char.id}`}
+                            href={`/projects/${projectId}/characters/${char.id}`}
                             className="group block bg-[#192a31] rounded-2xl border border-zinc-900 p-5 hover:border-zinc-700 hover:bg-zinc-900 transition-all hover:shadow-2xl hover:-translate-y-1 relative"
                         >
                             <div className="flex gap-4 items-start">
@@ -167,11 +234,11 @@ export default function GlobalCharacterPage() {
                     {filteredCharacters.length === 0 && (
                         <div className="col-span-full py-20 flex flex-col items-center justify-center opacity-30 select-none">
                             <User size={64} className="mb-4" />
-                            <p className="font-bold">該当するキャラクターがいません</p>
+                            <p className="font-bold">このプロジェクトにはキャラクターがいません</p>
                         </div>
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

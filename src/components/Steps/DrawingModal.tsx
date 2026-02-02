@@ -83,7 +83,7 @@ export const DrawingModal: React.FC<DrawingModalProps> = ({
                     </button>
                     <div>
                         <h2 className="text-white font-black text-xl tracking-tight">{title}</h2>
-                        <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest mt-0.5">Focus Mode / Full Screen</p>
+                        <p className="text-sm text-zinc-600 font-bold uppercase tracking-widest mt-0.5">Focus Mode / Full Screen</p>
                     </div>
                 </div>
 

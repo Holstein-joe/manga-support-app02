@@ -1,6 +1,7 @@
 'use client'
 
 import { useSession, signIn, signOut } from "next-auth/react"
+import Link from "next/link"
 import { Button } from "@/components/ui/Button"
 import { LogOut, LogIn, User } from "lucide-react"
 
@@ -16,10 +17,12 @@ export function UserMenu({ showName = true, showLogoutLabel = false }: UserMenuP
         return <div className="h-9 w-24 rounded-lg bg-zinc-800 animate-pulse" />
     }
 
+
+
     if (session && session.user) {
         return (
             <div className={`flex items-center gap-3 ${showLogoutLabel ? 'w-full justify-between' : ''}`}>
-                <div className="flex items-center gap-3 overflow-hidden">
+                <Link href="/settings" className="flex items-center gap-3 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity">
                     <div className="relative h-8 w-8 flex-shrink-0 rounded-full overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center">
                         {session.user.image ? (
                             <img
@@ -37,34 +40,11 @@ export function UserMenu({ showName = true, showLogoutLabel = false }: UserMenuP
                                 {session.user.name || session.user.email}
                             </p>
                             <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 leading-none">
-                                ログイン中
+                                設定を開く
                             </p>
                         </div>
                     )}
-                </div>
-
-                {showLogoutLabel ? (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => signOut()}
-                        className="text-zinc-500 hover:text-red-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors gap-2"
-                        title="ログアウト"
-                    >
-                        <LogOut size={16} />
-                        <span className="text-xs">ログアウト</span>
-                    </Button>
-                ) : (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => signOut()}
-                        className="h-8 w-8 p-0 rounded-full text-zinc-500 hover:text-red-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex-shrink-0"
-                        title="ログアウト"
-                    >
-                        <LogOut size={16} />
-                    </Button>
-                )}
+                </Link>
             </div>
         )
     }

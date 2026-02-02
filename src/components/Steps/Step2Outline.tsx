@@ -60,7 +60,7 @@ export const Step2Outline: React.FC<Step2OutlineProps> = ({ project, onUpdate })
                             <div className="space-y-2 group">
                                 <label className="text-base font-bold text-zinc-900 dark:text-zinc-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                                     {item.label}
-                                    <span className="text-xs font-normal text-zinc-500 bg-zinc-50 px-2 py-1 rounded dark:bg-zinc-900">{item.desc}</span>
+                                    <span className="text-sm font-normal text-zinc-500 bg-zinc-50 px-2 py-1 rounded dark:bg-zinc-900">{item.desc}</span>
                                 </label>
                                 <textarea
                                     value={data[item.key as keyof typeof data]}
@@ -68,7 +68,7 @@ export const Step2Outline: React.FC<Step2OutlineProps> = ({ project, onUpdate })
                                     onBlur={handleBlur}
                                     rows={4}
                                     placeholder={item.placeholder}
-                                    className="w-full p-4 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900 focus:outline-none transition-all text-zinc-900 shadow-sm dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-100 dark:focus:bg-zinc-900 resize-none hover:border-zinc-300 dark:hover:border-zinc-700"
+                                    className="w-full p-4 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900 focus:outline-none transition-all text-zinc-900 shadow-sm dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-100 dark:focus:bg-zinc-900 resize-none hover:border-zinc-300 dark:hover:border-zinc-700 text-base"
                                 />
                             </div>
                         </div>

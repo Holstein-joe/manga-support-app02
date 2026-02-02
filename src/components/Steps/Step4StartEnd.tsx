@@ -42,7 +42,7 @@ export const Step4StartEnd: React.FC<Step4StartEndProps> = ({ project, onUpdate 
                 <div className="flex flex-col gap-4">
                     <div className="space-y-2 p-4 bg-zinc-50 rounded-lg border border-zinc-100 dark:bg-zinc-900 dark:border-zinc-800">
                         <label className="text-sm font-bold text-zinc-900 dark:text-zinc-50">START（最初のシーン）</label>
-                        <p className="text-xs text-zinc-500">物語はどこから始まる？ 読者を引き込む「ツカミ」は何か。</p>
+                        <p className="text-sm text-zinc-500">物語はどこから始まる？ 読者を引き込む「ツカミ」は何か。</p>
                         <textarea
                             value={data.startScene}
                             onChange={(e) => handleChange('startScene', e.target.value)}
@@ -59,13 +59,13 @@ export const Step4StartEnd: React.FC<Step4StartEndProps> = ({ project, onUpdate 
 
                     <div className="space-y-2 p-4 bg-indigo-50/50 rounded-lg border border-indigo-100 dark:bg-indigo-950/20 dark:border-indigo-900/30">
                         <label className="text-sm font-bold text-indigo-900 dark:text-indigo-200">GOAL（具体的な目標）</label>
-                        <p className="text-xs text-indigo-700/70 dark:text-indigo-300/70">主人公は何を達成すれば物語が終わるのか。</p>
+                        <p className="text-sm text-indigo-700/70 dark:text-indigo-300/70">主人公は何を達成すれば物語が終わるのか。</p>
                         <input
                             type="text"
                             value={data.goal}
                             onChange={(e) => handleChange('goal', e.target.value)}
                             onBlur={handleBlur}
-                            className="w-full p-3 rounded-lg border border-indigo-200 bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all text-zinc-900 dark:bg-zinc-950 dark:border-indigo-800 dark:text-zinc-50 dark:focus:ring-indigo-400"
+                            className="w-full p-3 rounded-lg border border-indigo-200 bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all text-zinc-900 dark:bg-zinc-950 dark:border-indigo-800 dark:text-zinc-50 dark:focus:ring-indigo-400 text-base"
                         />
                     </div>
 
@@ -75,14 +75,14 @@ export const Step4StartEnd: React.FC<Step4StartEndProps> = ({ project, onUpdate 
 
                     <div className="space-y-2 p-4 bg-zinc-50 rounded-lg border border-zinc-100 dark:bg-zinc-900 dark:border-zinc-800">
                         <label className="text-sm font-bold text-zinc-900 dark:text-zinc-50">END（最後のシーン）</label>
-                        <p className="text-xs text-zinc-500">どんなラストシーンで終わるか。STARTとの対比。</p>
+                        <p className="text-sm text-zinc-500">どんなラストシーンで終わるか。STARTとの対比。</p>
                         <textarea
                             value={data.endScene}
                             onChange={(e) => handleChange('endScene', e.target.value)}
                             onBlur={handleBlur}
                             rows={4}
                             placeholder="例：主人公が笑顔で空を見上げるシーン..."
-                            className="w-full p-3 rounded-lg border border-zinc-200 bg-white focus:ring-2 focus:ring-zinc-900 focus:outline-none transition-all text-zinc-900 dark:bg-zinc-950 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-100 dark:focus:bg-zinc-900 resize-none"
+                            className="w-full p-3 rounded-lg border border-zinc-200 bg-white focus:ring-2 focus:ring-zinc-900 focus:outline-none transition-all text-zinc-900 dark:bg-zinc-950 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-100 dark:focus:bg-zinc-900 resize-none text-base"
                         />
                     </div>
                 </div>

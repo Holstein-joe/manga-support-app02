@@ -6,12 +6,17 @@ import { useRouter, useParams } from 'next/navigation';
 import { useCharacters } from '@/hooks/useCharacters';
 import { CharacterItem, CharacterProfile } from '@/types/project';
 import { Button } from '@/components/ui/Button';
-import { ArrowLeft, Save, Trash2, User, Upload, X, ChevronRight, HelpCircle } from 'lucide-react';
+import { ArrowLeft, Upload, User, Trash2, X, Plus, Check } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 interface Tab {
     id: string;
     label: string;
+}
+
+interface ImageModalProps {
+    src: string;
+    onClose: () => void;
 }
 
 const TABS: Tab[] = [
@@ -23,15 +28,239 @@ const TABS: Tab[] = [
     { id: 'private', label: 'プライベート' },
 ];
 
-export const CharacterDetailClient = () => {
+interface SharedFieldProps {
+    label: string;
+    value?: string;
+    placeholder?: string;
+    onChange: (value: string) => void;
+}
+
+const SectionCard = ({ title, children }: { title: string, children: React.ReactNode }) => (
+    <div className="bg-[#111] border border-zinc-800 rounded-2xl p-6 md:p-8">
+        <h3 className="text-xl font-bold mb-6 text-zinc-100 flex items-center gap-2">
+            <div className="w-1 h-6 bg-white rounded-full"></div>
+            {title}
+        </h3>
+        {children}
+    </div>
+);
+
+const FormField = ({ label, value, onChange, placeholder }: SharedFieldProps) => (
+    <div>
+        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">{label}</label>
+        <input
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:border-zinc-600 focus:bg-zinc-800 transition-all placeholder:text-zinc-700"
+        />
+    </div>
+);
+
+const FormTextarea = ({ label, value, onChange, placeholder, height = "h-24" }: SharedFieldProps & { height?: string }) => (
+    <div>
+        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">{label}</label>
+        <textarea
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            className={`w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:border-zinc-600 focus:bg-zinc-800 transition-all placeholder:text-zinc-700 resize-none leading-relaxed ${height}`}
+        />
+    </div>
+);
+
+interface CauseFieldProps extends SharedFieldProps {
+    cause?: string;
+    onCauseChange?: (value: string) => void;
+    height?: string;
+}
+
+const CauseField = ({ label, value, cause, onChange, onCauseChange, placeholder, height = "h-20" }: CauseFieldProps) => (
+    <div className="mb-6 group">
+        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">{label}</label>
+        <div className="space-y-2">
+            <textarea
+                value={value || ''}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={placeholder}
+                className={`w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all placeholder:text-zinc-700 resize-none leading-relaxed ${height}`}
+            />
+            <div className="pl-4 border-l-2 border-zinc-800 group-focus-within:border-zinc-600 transition-colors">
+                <input
+                    value={cause || ''}
+                    onChange={(e) => onCauseChange?.(e.target.value)}
+                    placeholder="↳ 原因・理由・背景..."
+                    className="w-full bg-transparent text-sm text-zinc-400 focus:text-zinc-200 focus:outline-none placeholder:text-zinc-700 py-1"
+                />
+            </div>
+        </div>
+    </div>
+);
+
+interface TriggerFieldProps extends SharedFieldProps {
+    trigger?: string;
+    onTriggerChange?: (value: string) => void;
+}
+
+const TriggerField = ({ label, value, trigger, onChange, onTriggerChange, placeholder }: TriggerFieldProps) => (
+    <div className="mb-6">
+        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">{label}</label>
+        <div className="space-y-2">
+            <input
+                value={value || ''}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={placeholder}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all placeholder:text-zinc-700"
+            />
+            <div className="pl-4 border-l-2 border-zinc-800">
+                <input
+                    value={trigger || ''}
+                    onChange={(e) => onTriggerChange?.(e.target.value)}
+                    placeholder="↳ きっかけ・トリガー"
+                    className="w-full bg-transparent text-sm text-zinc-400 focus:text-zinc-200 focus:outline-none placeholder:text-zinc-700 py-1"
+                />
+            </div>
+        </div>
+    </div>
+);
+
+interface ActivityFieldProps extends SharedFieldProps {
+    trigger?: string;
+    feeling?: string;
+    onTriggerChange?: (value: string) => void;
+    onFeelingChange?: (value: string) => void;
+}
+
+const ActivityField = ({ label, value, trigger, feeling, onChange, onTriggerChange, onFeelingChange }: ActivityFieldProps) => (
+    <div className="mb-8 p-4 bg-zinc-900/30 rounded-xl border border-zinc-800/50">
+        <h4 className="text-sm font-bold text-zinc-400 mb-3">{label}</h4>
+        <div className="space-y-3">
+            <input
+                value={value || ''}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder="活動内容..."
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-zinc-200 focus:outline-none focus:border-zinc-600"
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-2">
+                <input
+                    value={trigger || ''}
+                    onChange={(e) => onTriggerChange?.(e.target.value)}
+                    placeholder="きっかけ..."
+                    className="w-full bg-transparent border-b border-zinc-800 focus:border-zinc-500 text-xs text-zinc-400 focus:outline-none py-1"
+                />
+                <input
+                    value={feeling || ''}
+                    onChange={(e) => onFeelingChange?.(e.target.value)}
+                    placeholder="その時の感情..."
+                    className="w-full bg-transparent border-b border-zinc-800 focus:border-zinc-500 text-xs text-zinc-400 focus:outline-none py-1"
+                />
+            </div>
+        </div>
+    </div>
+);
+
+interface EpisodeFieldProps extends SharedFieldProps {
+    cause?: string;
+    episode?: string;
+    onCauseChange?: (value: string) => void;
+    onEpisodeChange?: (value: string) => void;
+}
+
+const EpisodeField = ({ label, value, cause, episode, onChange, onCauseChange, onEpisodeChange, placeholder }: EpisodeFieldProps) => (
+    <div className="mb-6">
+        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">{label}</label>
+        <div className="space-y-3">
+            <textarea
+                value={value || ''}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={placeholder}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all placeholder:text-zinc-700 resize-none h-20"
+            />
+            {cause !== undefined && (
+                <div className="pl-4 border-l-2 border-zinc-800">
+                    <input
+                        value={cause || ''}
+                        onChange={(e) => onCauseChange?.(e.target.value)}
+                        placeholder="↳ 原因・理由"
+                        className="w-full bg-transparent text-sm text-zinc-400 focus:text-zinc-200 focus:outline-none placeholder:text-zinc-700 py-1"
+                    />
+                </div>
+            )}
+            <div className="pl-4 border-l-2 border-zinc-800 pt-1">
+                <textarea
+                    value={episode || ''}
+                    onChange={(e) => onEpisodeChange?.(e.target.value)}
+                    placeholder="↳ 具体的なエピソード"
+                    className="w-full bg-zinc-900/50 border border-zinc-800/50 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-zinc-600 resize-none h-16 placeholder:text-zinc-700"
+                />
+            </div>
+        </div>
+    </div>
+);
+
+interface EpisodeCollectionProps {
+    title: string;
+    field: keyof CharacterProfile;
+    values?: string[];
+    onUpdate: (field: keyof CharacterProfile, index: number, value: string) => void;
+}
+
+const EpisodeCollection = ({ title, field, values = [], onUpdate }: EpisodeCollectionProps) => {
+    const safeValues = [...(values || [])];
+    // Ensure at least 4 slots
+    while (safeValues.length < 4) safeValues.push('');
+
+    return (
+        <SectionCard title={title}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {safeValues.slice(0, 4).map((val: string, idx: number) => (
+                    <div key={idx} className="relative">
+                        <span className="absolute top-2 left-3 text-xs font-bold text-zinc-600">#{idx + 1}</span>
+                        <textarea
+                            value={val}
+                            onChange={(e) => onUpdate(field, idx, e.target.value)}
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-zinc-200 focus:outline-none focus:border-zinc-600 focus:bg-zinc-800 transition-all placeholder:text-zinc-700 resize-none h-24 text-sm"
+                            placeholder="内容を入力..."
+                        />
+                    </div>
+                ))}
+            </div>
+        </SectionCard>
+    );
+};
+
+import { useDebounce } from '@/hooks/useDebounce'; // Add import
+
+export const CharacterDetailClient = ({
+    characterId,
+    backLink = '/characters'
+}: {
+    characterId?: string;
+    backLink?: string;
+}) => {
     const params = useParams();
-    const id = params?.id as string;
+    // If characterId prop is passed, use it.
+    // Otherwise check for 'charId' (project route) or 'id' (global route) in params.
+    const id = characterId || (params?.charId as string) || (params?.id as string);
     const router = useRouter();
-    const { characters, updateCharacter, deleteCharacter } = useCharacters();
+    const { characters, groups, updateCharacter, deleteCharacter, addGroup } = useCharacters();
     const [character, setCharacter] = useState<CharacterItem | null>(null);
     const [activeTab, setActiveTab] = useState('basic');
     const [isSaving, setIsSaving] = useState(false);
+    const [status, setStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved'); // New status state for detailed feedback
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [isUploadingGallery, setIsUploadingGallery] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const galleryInputRef = useRef<HTMLInputElement>(null);
+
+    // Group creation state
+    const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+    const [newGroupName, setNewGroupName] = useState('');
+
+    // Auto-save logic
+    // We only want to auto-save when 'character' changes, but ignoring the initial set
+    const debouncedCharacter = useDebounce(character, 1000);
+    const isFirstLoad = useRef(true);
 
     // Initial load
     useEffect(() => {
@@ -39,14 +268,45 @@ export const CharacterDetailClient = () => {
 
         const found = characters.find(c => c.id === id);
         if (found) {
-            // Ensure profile object exists
-            if (!found.profile) {
-                setCharacter({ ...found, profile: {} as CharacterProfile });
-            } else {
-                setCharacter(found);
+            // Only set initial state if we haven't edited it yet (or on first mount)
+            // But since 'characters' updates when we save, we need to be careful not to overwrite local edits if we were typing?
+            // Actually, for a single user local app, 'characters' coming from useCharacters is the source of truth, but we have local state 'character'.
+            // When we save, 'characters' will update.
+            // We should sync local 'character' with 'found' ONLY on initial load.
+            // Re-syncing on every 'characters' change might clobber typing if updates are slow.
+            if (isFirstLoad.current) {
+                if (!found.profile) {
+                    setCharacter({ ...found, profile: {} as CharacterProfile });
+                } else {
+                    setCharacter(found);
+                }
+                isFirstLoad.current = false;
             }
         }
     }, [characters, id]);
+
+    // Effect for auto-save
+    useEffect(() => {
+        // Skip null or if it's just the initial load 
+        if (!debouncedCharacter) return;
+
+        const currentStored = characters.find(c => c.id === id);
+        if (!currentStored) return;
+
+        // specific props comparison
+        // We compare the whole object or just relevant fields
+        // Since we update whole object structure in updateCharacter, full comparison is fine
+        // But we need to be careful about circular refs or functions? CharacterItem is simple data.
+        const isDifferent = JSON.stringify(debouncedCharacter) !== JSON.stringify(currentStored);
+
+        if (isDifferent) {
+            setStatus('saving');
+            updateCharacter(debouncedCharacter.id, {
+                ...debouncedCharacter
+            });
+            setTimeout(() => setStatus(prev => prev === 'saving' ? 'saved' : prev), 800);
+        }
+    }, [debouncedCharacter, characters, id, updateCharacter]);
 
     // Handle loading and not found states
     if (!id) return <div className="p-10 text-center text-zinc-500">Initializing...</div>;
@@ -60,18 +320,24 @@ export const CharacterDetailClient = () => {
                 <User size={64} className="text-zinc-700 mb-4" />
                 <h1 className="text-xl font-bold mb-2">Character Not Found</h1>
                 <p className="text-zinc-500 mb-6">ID: {id}</p>
-                <Link href="/characters">
+                <Link href={backLink}>
                     <Button variant="ghost" className="border border-zinc-700">Go Back</Button>
                 </Link>
             </div>
         );
     }
 
+    // ... helper logic for handleUpdate etc is already defined above in previous chunks, 
+    // but we need to ensure this block includes isReady definition which was lost in previous edit
+
+
     const handleUpdate = (field: keyof CharacterItem, value: any) => {
+        setStatus('unsaved');
         setCharacter(prev => prev ? { ...prev, [field]: value } : null);
     };
 
     const handleProfileUpdate = (field: keyof CharacterProfile, value: string | string[]) => {
+        setStatus('unsaved');
         setCharacter(prev => {
             if (!prev) return null;
             return {
@@ -89,6 +355,13 @@ export const CharacterDetailClient = () => {
         const newArray = [...currentArray];
         newArray[index] = value;
         handleProfileUpdate(field, newArray);
+    };
+
+    const handleCreateGroup = () => {
+        if (!newGroupName.trim()) return;
+        addGroup(newGroupName);
+        setNewGroupName('');
+        setIsCreatingGroup(false);
     };
 
     const saveChanges = async () => {
@@ -110,7 +383,7 @@ export const CharacterDetailClient = () => {
     const handleDelete = () => {
         if (confirm('本当にこのキャラクターを削除しますか？\nこの操作は取り消せません。')) {
             deleteCharacter(character.id);
-            router.push('/characters');
+            router.push(backLink);
         }
     };
 
@@ -138,30 +411,95 @@ export const CharacterDetailClient = () => {
         }
     };
 
+    const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setIsUploadingGallery(true);
+            const file = e.target.files[0];
+            const filename = `gallery-${character.id}-${Date.now()}.jpg`;
+            try {
+                const { error } = await supabase.storage
+                    .from('characters')
+                    .upload(filename, file, { upsert: true });
+
+                if (error) throw error;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('characters')
+                    .getPublicUrl(filename);
+
+                const currentImages = character.profile?.appearanceImages || [];
+                handleProfileUpdate('appearanceImages', [...currentImages, publicUrl]);
+
+                // Auto-save effectively happens via local state update, but we might want to trigger save?
+                // The existing architecture saves on 'Save' button click, but handleIconUpload saves immediately.
+                // Let's stick to consistent manual save for profile data, unlike icon which is a direct property.
+                // However, for file uploads user usually expects auto-save.
+                // Let's trigger updateCharacter immediately for this property to avoid "upload -> forget save -> loose image".
+                if (character) {
+                    const updatedProfile = {
+                        ...character.profile,
+                        appearanceImages: [...currentImages, publicUrl]
+                    };
+                    updateCharacter(character.id, { profile: updatedProfile });
+                }
+
+            } catch (err) {
+                console.error('Gallery upload failed', err);
+                alert('画像のアップロードに失敗しました');
+            } finally {
+                setIsUploadingGallery(false);
+                if (galleryInputRef.current) galleryInputRef.current.value = '';
+            }
+        }
+    };
+
+    const handleRemoveGalleryImage = (index: number) => {
+        if (confirm('この画像を削除しますか？')) {
+            const currentImages = character.profile?.appearanceImages || [];
+            const newImages = currentImages.filter((_, i) => i !== index);
+            handleProfileUpdate('appearanceImages', newImages);
+
+            // Sync save as well
+            if (character) {
+                const updatedProfile = {
+                    ...character.profile,
+                    appearanceImages: newImages
+                };
+                updateCharacter(character.id, { profile: updatedProfile });
+            }
+        }
+    };
+
     const p = character.profile || {};
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white pb-40">
-            {/* Header */}
-            <div className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800">
-                <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Link href="/characters" className="text-zinc-400 hover:text-white transition-colors">
-                            <ArrowLeft size={20} />
-                        </Link>
+        <div className="min-h-screen bg-zinc-950 text-white p-4 md:p-8 pb-32">
+            <div className="max-w-5xl mx-auto">
+                <div className="mb-6 flex items-center justify-between">
+                    <Link href={backLink}>
+                        <Button variant="ghost" size="sm" className="text-zinc-500 hover:text-white pl-0 hover:bg-transparent">
+                            <ArrowLeft className="w-4 h-4 mr-1" />
+                            一覧へ戻る
+                        </Button>
+                    </Link>
+                    <div className="flex gap-2">
                         <h1 className="font-bold text-lg truncate max-w-[200px] md:max-w-md">
                             {character.name || '名称未定'}
                         </h1>
                     </div>
                     <div className="flex items-center gap-3">
-                        <Button
-                            onClick={saveChanges}
-                            disabled={isSaving}
-                            className="bg-white text-black hover:bg-zinc-200 font-bold px-6 rounded-full"
-                        >
-                            <Save size={16} className="mr-2" />
-                            {isSaving ? '保存中...' : '保存'}
-                        </Button>
+                        <div className={`text-xs font-bold px-3 py-1.5 rounded-full transition-colors flex items-center gap-2 ${status === 'saving' ? 'text-blue-400 bg-blue-400/10' :
+                            status === 'unsaved' ? 'text-amber-500 bg-amber-500/10' :
+                                'text-zinc-500 bg-zinc-800'
+                            }`}>
+                            {status === 'saving' && <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />}
+                            {status === 'unsaved' && <div className="w-2 h-2 rounded-full bg-amber-500" />}
+                            {status === 'saved' && <div className="w-2 h-2 rounded-full bg-zinc-500" />}
+
+                            {status === 'saving' ? '保存中...' :
+                                status === 'unsaved' ? '未保存' :
+                                    '保存済み'}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -212,11 +550,63 @@ export const CharacterDetailClient = () => {
                                 placeholder="例: 世界を救う運命を背負った少年"
                             />
                         </div>
+
+                        {/* Group Selection */}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-4 pt-4 border-t border-zinc-900 border-dashed">
+                            <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider shrink-0">所属グループ:</label>
+
+                            {!isCreatingGroup ? (
+                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                    <select
+                                        value={character.groupIds?.[0] || ''}
+                                        onChange={(e) => handleUpdate('groupIds', [e.target.value])}
+                                        className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-sm text-zinc-300 focus:outline-none focus:border-zinc-600 w-full sm:w-auto text-ellipsis"
+                                    >
+                                        <option value="">未設定</option>
+                                        {groups.map(g => (
+                                            <option key={g.id} value={g.id}>{g.name}</option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        onClick={() => setIsCreatingGroup(true)}
+                                        className="text-zinc-500 hover:text-white p-1.5 rounded hover:bg-zinc-800 transition-colors shrink-0"
+                                        title="新しいグループを作成"
+                                    >
+                                        <Plus size={16} />
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-200 w-full sm:w-auto">
+                                    <input
+                                        value={newGroupName}
+                                        onChange={(e) => setNewGroupName(e.target.value)}
+                                        className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-sm text-zinc-300 focus:outline-none focus:border-blue-500 flex-1 sm:w-40 min-w-0"
+                                        placeholder="グループ名"
+                                        autoFocus
+                                        onKeyDown={(e) => e.key === 'Enter' && handleCreateGroup()}
+                                    />
+                                    <button
+                                        onClick={handleCreateGroup}
+                                        className="text-blue-400 hover:text-blue-300 p-1.5 rounded hover:bg-blue-400/10 transition-colors"
+                                        title="作成"
+                                    >
+                                        <Check size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => setIsCreatingGroup(false)}
+                                        className="text-zinc-500 hover:text-zinc-300 p-1.5 rounded hover:bg-zinc-800 transition-colors"
+                                        title="キャンセル"
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
                 {/* Tabs */}
-                <div className="border-b border-zinc-800 flex gap-6 overflow-x-auto scrollbar-hide sticky top-16 bg-zinc-950 z-40 pt-2">
+                <div className="border-b border-zinc-800 flex gap-6 overflow-x-auto scrollbar-hide sticky top-0 bg-zinc-950 z-40 pt-4 pb-0">
                     {TABS.map(tab => (
                         <button
                             key={tab.id}
@@ -322,6 +712,48 @@ export const CharacterDetailClient = () => {
                     {activeTab === 'appearance' && (
                         <div className="space-y-12">
                             <SectionCard title="身体的特徴">
+                                <div className="mb-8">
+                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">参考画像・イメージボード</label>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                        {/* Upload Button */}
+                                        <div
+                                            onClick={() => galleryInputRef.current?.click()}
+                                            className="aspect-square rounded-xl border-2 border-dashed border-zinc-800 hover:border-zinc-600 hover:bg-zinc-900 transition-all flex flex-col items-center justify-center cursor-pointer text-zinc-500 hover:text-zinc-300"
+                                        >
+                                            <Upload size={24} className="mb-2" />
+                                            <span className="text-xs font-bold">{isUploadingGallery ? 'UP中...' : '画像を追加'}</span>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            className="hidden"
+                                            ref={galleryInputRef}
+                                            accept="image/*"
+                                            onChange={handleGalleryUpload}
+                                        />
+
+                                        {/* Images */}
+                                        {(p.appearanceImages || []).map((img, idx) => (
+                                            <div key={idx} className="group relative aspect-square rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden">
+                                                <img
+                                                    src={img}
+                                                    alt={`Gallery ${idx}`}
+                                                    className="w-full h-full object-cover cursor-pointer transition-transform group-hover:scale-105"
+                                                    onClick={() => setSelectedImage(img)}
+                                                />
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleRemoveGalleryImage(idx);
+                                                    }}
+                                                    className="absolute top-1 right-1 p-1 bg-black/50 hover:bg-red-500/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all"
+                                                >
+                                                    <X size={12} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 <FormTextarea label="外見の第一印象" value={p.firstImpression} onChange={v => handleProfileUpdate('firstImpression', v)} />
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
                                     <FormField label="人種・種族" value={p.race} onChange={v => handleProfileUpdate('race', v)} />
@@ -451,186 +883,43 @@ export const CharacterDetailClient = () => {
                                     <TriggerField label="将来の夢・個人的目標" value={p.futureGoal} trigger={p.futureGoalTrigger} onChange={v => handleProfileUpdate('futureGoal', v)} onTriggerChange={v => handleProfileUpdate('futureGoalTrigger', v)} />
                                 </div>
                             </SectionCard>
-
                             <EpisodeCollection title="プライベートエピソード" field="privateEpisodes" values={p.privateEpisodes} onUpdate={handleArrayUpdate} />
                         </div>
                     )}
 
-                </div>
 
-                {/* Danger Zone */}
-                <div className="mt-20 pt-10 border-t border-zinc-900">
-                    <h3 className="text-zinc-500 font-bold mb-4">Danger Zone</h3>
-                    <Button onClick={handleDelete} variant="ghost" className="text-red-500 hover:text-red-400 hover:bg-red-950/20 px-4 border border-red-900/30 rounded-xl">
-                        <Trash2 size={16} className="mr-2" />
-                        このキャラクターを削除
-                    </Button>
-                </div>
+                    {/* Danger Zone */}
+                    <div className="mt-20 pt-10 border-t border-zinc-900">
+                        <h3 className="text-zinc-500 font-bold mb-4">Danger Zone</h3>
+                        <Button onClick={handleDelete} variant="ghost" className="text-red-500 hover:text-red-400 hover:bg-red-950/20 px-4 border border-red-900/30 rounded-xl">
+                            <Trash2 size={16} className="mr-2" />
+                            このキャラクターを削除
+                        </Button>
+                    </div>
+                </div> {/* End Content */}
             </div>
-        </div>
-    );
-};
-
-// --- Reusable Components ---
-
-const SectionCard = ({ title, children }: { title: string, children: React.ReactNode }) => (
-    <div className="bg-[#111] border border-zinc-800 rounded-2xl p-6 md:p-8">
-        <h3 className="text-xl font-bold mb-6 text-zinc-100 flex items-center gap-2">
-            <div className="w-1 h-6 bg-white rounded-full"></div>
-            {title}
-        </h3>
-        {children}
-    </div>
-);
-
-const FormField = ({ label, value, onChange, placeholder }: { label: string, value?: string, onChange: (v: string) => void, placeholder?: string }) => (
-    <div>
-        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">{label}</label>
-        <input
-            value={value || ''}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:border-zinc-600 focus:bg-zinc-800 transition-all placeholder:text-zinc-700"
-        />
-    </div>
-);
-
-const FormTextarea = ({ label, value, onChange, placeholder, height = "h-24" }: { label: string, value?: string, onChange: (v: string) => void, placeholder?: string, height?: string }) => (
-    <div>
-        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">{label}</label>
-        <textarea
-            value={value || ''}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder}
-            className={`w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:border-zinc-600 focus:bg-zinc-800 transition-all placeholder:text-zinc-700 resize-none leading-relaxed ${height}`}
-        />
-    </div>
-);
-
-const CauseField = ({ label, value, cause, onChange, onCauseChange, placeholder, height = "h-20" }: any) => (
-    <div className="mb-6 group">
-        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">{label}</label>
-        <div className="space-y-2">
-            <textarea
-                value={value || ''}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder={placeholder}
-                className={`w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all placeholder:text-zinc-700 resize-none leading-relaxed ${height}`}
-            />
-            <div className="pl-4 border-l-2 border-zinc-800 group-focus-within:border-zinc-600 transition-colors">
-                <input
-                    value={cause || ''}
-                    onChange={(e) => onCauseChange(e.target.value)}
-                    placeholder="↳ 原因・理由・背景..."
-                    className="w-full bg-transparent text-sm text-zinc-400 focus:text-zinc-200 focus:outline-none placeholder:text-zinc-700 py-1"
-                />
-            </div>
-        </div>
-    </div>
-);
-
-const TriggerField = ({ label, value, trigger, onChange, onTriggerChange, placeholder }: any) => (
-    <div className="mb-6">
-        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">{label}</label>
-        <div className="space-y-2">
-            <input
-                value={value || ''}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder={placeholder}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all placeholder:text-zinc-700"
-            />
-            <div className="pl-4 border-l-2 border-zinc-800">
-                <input
-                    value={trigger || ''}
-                    onChange={(e) => onTriggerChange(e.target.value)}
-                    placeholder="↳ きっかけ・トリガー"
-                    className="w-full bg-transparent text-sm text-zinc-400 focus:text-zinc-200 focus:outline-none placeholder:text-zinc-700 py-1"
-                />
-            </div>
-        </div>
-    </div>
-);
-
-const ActivityField = ({ label, value, trigger, feeling, onChange, onTriggerChange, onFeelingChange }: any) => (
-    <div className="mb-8 p-4 bg-zinc-900/30 rounded-xl border border-zinc-800/50">
-        <h4 className="text-sm font-bold text-zinc-400 mb-3">{label}</h4>
-        <div className="space-y-3">
-            <input
-                value={value || ''}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder="活動内容..."
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-zinc-200 focus:outline-none focus:border-zinc-600"
-            />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-2">
-                <input
-                    value={trigger || ''}
-                    onChange={(e) => onTriggerChange(e.target.value)}
-                    placeholder="きっかけ..."
-                    className="w-full bg-transparent border-b border-zinc-800 focus:border-zinc-500 text-xs text-zinc-400 focus:outline-none py-1"
-                />
-                <input
-                    value={feeling || ''}
-                    onChange={(e) => onFeelingChange(e.target.value)}
-                    placeholder="その時の感情..."
-                    className="w-full bg-transparent border-b border-zinc-800 focus:border-zinc-500 text-xs text-zinc-400 focus:outline-none py-1"
-                />
-            </div>
-        </div>
-    </div>
-);
-
-const EpisodeField = ({ label, value, cause, episode, onChange, onCauseChange, onEpisodeChange, placeholder }: any) => (
-    <div className="mb-6">
-        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">{label}</label>
-        <div className="space-y-3">
-            <textarea
-                value={value || ''}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder={placeholder}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all placeholder:text-zinc-700 resize-none h-20"
-            />
-            {cause !== undefined && (
-                <div className="pl-4 border-l-2 border-zinc-800">
-                    <input
-                        value={cause || ''}
-                        onChange={(e) => onCauseChange(e.target.value)}
-                        placeholder="↳ 原因・理由"
-                        className="w-full bg-transparent text-sm text-zinc-400 focus:text-zinc-200 focus:outline-none placeholder:text-zinc-700 py-1"
-                    />
-                </div>
-            )}
-            <div className="pl-4 border-l-2 border-zinc-800 pt-1">
-                <textarea
-                    value={episode || ''}
-                    onChange={(e) => onEpisodeChange(e.target.value)}
-                    placeholder="↳ 具体的なエピソード"
-                    className="w-full bg-zinc-900/50 border border-zinc-800/50 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-zinc-600 resize-none h-16 placeholder:text-zinc-700"
-                />
-            </div>
-        </div>
-    </div>
-);
-
-const EpisodeCollection = ({ title, field, values = [], onUpdate }: any) => {
-    const safeValues = [...(values || [])];
-    // Ensure at least 4 slots
-    while (safeValues.length < 4) safeValues.push('');
-
-    return (
-        <SectionCard title={title}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {safeValues.slice(0, 4).map((val: string, idx: number) => (
-                    <div key={idx} className="relative">
-                        <span className="absolute top-2 left-3 text-xs font-bold text-zinc-600">#{idx + 1}</span>
-                        <textarea
-                            value={val}
-                            onChange={(e) => onUpdate(field, idx, e.target.value)}
-                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-zinc-200 focus:outline-none focus:border-zinc-600 focus:bg-zinc-800 transition-all placeholder:text-zinc-700 resize-none h-24 text-sm"
-                            placeholder="内容を入力..."
+            {/* Lightbox Modal */}
+            {
+                selectedImage && (
+                    <div
+                        className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200"
+                        onClick={() => setSelectedImage(null)}
+                    >
+                        <button
+                            onClick={() => setSelectedImage(null)}
+                            className="absolute top-4 right-4 p-2 text-white/50 hover:text-white transition-colors"
+                        >
+                            <X size={32} />
+                        </button>
+                        <img
+                            src={selectedImage}
+                            alt="Full size"
+                            className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                            onClick={(e) => e.stopPropagation()}
                         />
                     </div>
-                ))}
-            </div>
-        </SectionCard>
+                )
+            }
+        </div >
     );
 };

@@ -5,6 +5,7 @@ import { Project, CharacterItem } from '@/types/project';
 import { useCharacters } from '@/hooks/useCharacters';
 import { Button } from '@/components/ui/Button';
 import { Printer, FileText, User, BookOpen, Film } from 'lucide-react';
+import { TAG_LABELS, TagType } from './Step3Structure';
 
 interface Step7ExportProps {
     project: Project;
@@ -32,7 +33,8 @@ export const Step7Export: React.FC<Step7ExportProps> = ({ project }) => {
     const allScenes = (project.structureBoard || []).flatMap(group =>
         (group.scenes || []).map(scene => ({
             ...scene,
-            groupTitle: group.content
+            groupTitle: group.content,
+            groupTags: group.tags as TagType[] | undefined
         }))
     );
 
@@ -46,7 +48,7 @@ export const Step7Export: React.FC<Step7ExportProps> = ({ project }) => {
                         <span className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 text-zinc-50 text-sm dark:bg-zinc-100 dark:text-zinc-900">6</span>
                         企画書出力
                     </h2>
-                    <p className="text-zinc-500 dark:text-zinc-400 text-xs">
+                    <p className="text-zinc-500 dark:text-zinc-400 text-sm">
                         下のボタンを押すと、このページを印刷またはPDFとして保存できます。
                     </p>
                 </div>
@@ -104,11 +106,11 @@ export const Step7Export: React.FC<Step7ExportProps> = ({ project }) => {
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="bg-zinc-50 p-6 rounded-lg border border-zinc-100">
-                            <h4 className="font-bold text-zinc-400 text-xs uppercase mb-2">テーマ (Theme)</h4>
+                            <h4 className="font-bold text-zinc-400 text-sm uppercase mb-2">テーマ (Theme)</h4>
                             <p className="text-lg font-serif font-bold">{project.concept?.theme || '-'}</p>
                         </div>
                         <div className="bg-zinc-50 p-6 rounded-lg border border-zinc-100">
-                            <h4 className="font-bold text-zinc-400 text-xs uppercase mb-2">読後感 (Emotion)</h4>
+                            <h4 className="font-bold text-zinc-400 text-sm uppercase mb-2">読後感 (Emotion)</h4>
                             <p className="text-lg">{project.concept?.emotions || '-'}</p>
                         </div>
 
@@ -161,11 +163,11 @@ export const Step7Export: React.FC<Step7ExportProps> = ({ project }) => {
                     {/* Outline */}
                     <div className="grid grid-cols-2 gap-4 mb-8">
                         <div className="p-4 bg-zinc-50 border-l-4 border-zinc-300">
-                            <span className="block text-xs font-bold text-zinc-400 mb-1">START</span>
+                            <span className="block text-sm font-bold text-zinc-400 mb-1">START</span>
                             <p className="font-medium text-sm">{project.outline?.start || '-'}</p>
                         </div>
                         <div className="p-4 bg-zinc-50 border-l-4 border-zinc-300">
-                            <span className="block text-xs font-bold text-zinc-400 mb-1">GOAL</span>
+                            <span className="block text-sm font-bold text-zinc-400 mb-1">GOAL</span>
                             <p className="font-medium text-sm">{project.outline?.end || '-'}</p>
                         </div>
                     </div>
@@ -178,7 +180,21 @@ export const Step7Export: React.FC<Step7ExportProps> = ({ project }) => {
                                 <div key={scene.id} className="flex gap-4 items-baseline border-b border-zinc-100 pb-3 keep-together">
                                     <span className="font-mono text-zinc-400 w-8 shrink-0 text-right">#{index + 1}</span>
                                     <div className="flex-1">
-                                        <div className="mb-1 font-bold text-xs text-zinc-500 uppercase">{scene.groupTitle}</div>
+                                        <div className="mb-1 flex items-center gap-2">
+                                            <span className="font-bold text-sm text-zinc-500 uppercase">{scene.groupTitle}</span>
+                                            {scene.groupTags && scene.groupTags.length > 0 && (
+                                                <div className="flex gap-1">
+                                                    {scene.groupTags.map((tag) => (
+                                                        <span
+                                                            key={tag}
+                                                            className={`px-1.5 py-0.5 text-sm rounded border font-bold bg-white ${TAG_LABELS[tag]?.color} border-zinc-300`}
+                                                        >
+                                                            {TAG_LABELS[tag]?.label}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
 
                                         {/* 画像がある場合 */}
                                         {scene.drawing && (
@@ -192,7 +208,7 @@ export const Step7Export: React.FC<Step7ExportProps> = ({ project }) => {
                                                 const char = displayCharacters.find(c => c.id === d.characterId);
                                                 return (
                                                     <div key={i} className="text-sm flex gap-2">
-                                                        <span className="font-bold text-zinc-600 shrink-0 text-xs w-16 truncate">
+                                                        <span className="font-bold text-zinc-600 shrink-0 text-sm w-16 truncate">
                                                             {char?.name || d.character || '???'}
                                                         </span>
                                                         <span className="text-zinc-800">「{d.text}」</span>
@@ -210,7 +226,7 @@ export const Step7Export: React.FC<Step7ExportProps> = ({ project }) => {
                 </section>
 
                 {/* フッター */}
-                <div className="mt-20 pt-8 border-t border-zinc-200 text-center text-zinc-400 text-xs flex justify-between items-center">
+                <div className="mt-20 pt-8 border-t border-zinc-200 text-center text-zinc-400 text-sm flex justify-between items-center">
                     <span>Generated by Manga Support App</span>
                     <span>{new Date().toLocaleDateString()} 出力</span>
                 </div>
