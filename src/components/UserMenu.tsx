@@ -59,5 +59,17 @@ export function UserMenu({ showName = true, showLogoutLabel = false }: UserMenuP
             <LogIn size={14} />
             Googleでログイン
         </Button>
+        {
+        process.env.NODE_ENV === 'development' && (
+            <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => signIn("credentials")}
+                className="gap-2 text-[10px] font-bold uppercase tracking-wide h-9 px-4 text-zinc-400 hover:text-white"
+            >
+                Dev
+            </Button>
+        )
+    }
     )
 }
