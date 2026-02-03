@@ -50,17 +50,16 @@ export function UserMenu({ showName = true, showLogoutLabel = false }: UserMenuP
     }
 
     return (
-        <Button
-            variant="outline"
-            size="sm"
-            onClick={() => signIn("google")}
-            className="gap-2 text-[10px] font-bold uppercase tracking-wide h-9 px-4 bg-zinc-900 border-zinc-800 text-zinc-100 hover:bg-zinc-800 hover:text-white"
-        >
-            <LogIn size={14} />
-            Googleでログイン
-        </Button>
-        {
-        process.env.NODE_ENV === 'development' && (
+        <div className="flex items-center gap-2">
+            <Button
+                variant="outline"
+                size="sm"
+                onClick={() => signIn("google")}
+                className="gap-2 text-[10px] font-bold uppercase tracking-wide h-9 px-4 bg-zinc-900 border-zinc-800 text-zinc-100 hover:bg-zinc-800 hover:text-white"
+            >
+                <LogIn size={14} />
+                Googleでログイン
+            </Button>
             <Button
                 variant="ghost"
                 size="sm"
@@ -69,7 +68,6 @@ export function UserMenu({ showName = true, showLogoutLabel = false }: UserMenuP
             >
                 Dev
             </Button>
-        )
-    }
+        </div>
     )
 }
