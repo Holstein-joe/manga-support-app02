@@ -52,7 +52,7 @@ function LandingPage() {
           <Button
             size="lg"
             variant="outline"
-            onClick={() => signIn("credentials", { callbackUrl: "/dashboard" })}
+            onClick={() => signIn("credentials", { callbackUrl: "/" })}
             className="h-14 px-8 text-lg font-bold bg-zinc-800 text-white hover:bg-zinc-700 mt-4 w-full"
           >
             <LogIn className="mr-3 h-5 w-5" />
