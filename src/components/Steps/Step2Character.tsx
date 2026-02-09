@@ -1,41 +1,78 @@
 import React, { useState, useEffect } from 'react';
-import { Project } from '@/types/project';
+import { Project, CharacterItem, CharacterProfile } from '@/types/project';
 
 interface Step2CharacterProps {
     project: Project;
     onUpdate: (updates: Partial<Project>) => void;
 }
 
+// Helper function to get the main character's profile
+const getMainCharacterProfile = (project: Project): Partial<CharacterProfile> => {
+    const mainCharacter = project.characters?.[0];
+    return mainCharacter?.profile || {};
+};
+
 export const Step2Character: React.FC<Step2CharacterProps> = ({ project, onUpdate }) => {
+    // The local state of the component now represents a subset of the CharacterProfile
     const [data, setData] = useState({
-        name: project.character?.name || '',
-        age: project.character?.age || '',
-        personality: project.character?.personality || '',
-        desire: project.character?.desire || '',
-        problem: project.character?.problem || '',
-        weakness: project.character?.weakness || '',
-        note: project.character?.note || '',
+        name: getMainCharacterProfile(project).name || '',
+        age: getMainCharacterProfile(project).age || '',
+        personality: getMainCharacterProfile(project).personality || '',
+        desire: getMainCharacterProfile(project).motivation || '', // Map desire -> motivation
+        problem: getMainCharacterProfile(project).hardestEvent || '', // Map problem -> hardestEvent
+        weakness: getMainCharacterProfile(project).weaknesses || '',
     });
 
+    // When the project data changes from the parent, update the local state
     useEffect(() => {
+        const profile = getMainCharacterProfile(project);
         setData({
-            name: project.character?.name || '',
-            age: project.character?.age || '',
-            personality: project.character?.personality || '',
-            desire: project.character?.desire || '',
-            problem: project.character?.problem || '',
-            weakness: project.character?.weakness || '',
-            note: project.character?.note || '',
+            name: profile.name || '',
+            age: profile.age || '',
+            personality: profile.personality || '',
+            desire: profile.motivation || '',
+            problem: profile.hardestEvent || '',
+            weakness: profile.weaknesses || '',
         });
-    }, [project.character]);
+    }, [project.characters]);
 
     const handleChange = (field: keyof typeof data, value: string) => {
-        const newData = { ...data, [field]: value };
-        setData(newData);
+        setData(prevData => ({ ...prevData, [field]: value }));
     };
 
+    // When the user finishes editing, update the project state
     const handleBlur = () => {
-        onUpdate({ character: data });
+        const existingCharacters = project.characters || [];
+        const mainCharacter = existingCharacters[0] || { id: `char-${Date.now()}`, name: '' };
+
+        // Create the updated profile by merging the existing profile with the new data
+        const updatedProfile: CharacterProfile = {
+            ...mainCharacter.profile,
+            name: data.name,
+            age: data.age,
+            personality: data.personality,
+            motivation: data.desire,
+            hardestEvent: data.problem,
+            weaknesses: data.weakness,
+        };
+
+        // Create the updated character item
+        const updatedCharacter: CharacterItem = {
+            ...mainCharacter,
+            name: data.name, // Also update the top-level name for consistency
+            profile: updatedProfile,
+        };
+
+        // Create the new characters array
+        const newCharacters = [...existingCharacters];
+        if (newCharacters.length === 0) {
+            newCharacters.push(updatedCharacter);
+        } else {
+            newCharacters[0] = updatedCharacter;
+        }
+
+        // Call the parent's update function
+        onUpdate({ characters: newCharacters });
     };
 
     return (
