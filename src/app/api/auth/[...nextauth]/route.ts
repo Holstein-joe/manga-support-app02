@@ -6,32 +6,6 @@ import { NextAuthOptions } from "next-auth"
 
 export const dynamic = "force-dynamic";
 
-// --- Codespaces Support ---
-// Automatically detect and set the URL when running in GitHub Codespaces
-const isCodespaces = process.env.CODESPACES === 'true' || !!process.env.CODESPACE_NAME;
-
-if (isCodespaces) {
-    // 1. Try to construct the exact URL if possible
-    if (process.env.CODESPACE_NAME && process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN) {
-        // Construct the public URL: https://<name>-3000.<domain>
-        const codespaceUrl = `https://${process.env.CODESPACE_NAME}-3000.${process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}`;
-
-        // Set it, invalidating the localhost default
-        if (!process.env.NEXTAUTH_URL || process.env.NEXTAUTH_URL.includes('localhost')) {
-            process.env.NEXTAUTH_URL = codespaceUrl;
-            console.log(`[Codespaces] Auto-configured NEXTAUTH_URL to: ${codespaceUrl}`);
-        }
-    } else {
-        // 2. If we can't construct it but know we are in Codespaces (e.g. only CODESPACES=true is set),
-        // unset localhost so NextAuth uses the Host header (trustHost: true).
-        // This is crucial because .env often has NEXTAUTH_URL=http://localhost:3000
-        if (process.env.NEXTAUTH_URL?.includes('localhost')) {
-            console.log(`[Codespaces] Unsetting local NEXTAUTH_URL '''${process.env.NEXTAUTH_URL}''' to allow host header detection via trustHost.`);
-            delete process.env.NEXTAUTH_URL;
-        }
-    }
-}
-
 export const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(prisma) as any,
     providers: [
