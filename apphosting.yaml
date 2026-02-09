@@ -1,8 +1,10 @@
 kind: "AppStack"
 schemaVersion: "v1"
+build:
+  env:
+    - variable: DATABASE_URL
+      value: "postgresql://neondb_owner:npg_wBE71mlSJRcX@ep-weathered-bread-a18askry-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
 env:
-  - variable: DATABASE_URL
-    secret: DATABASE_URL
   - variable: NEXTAUTH_SECRET
     secret: NEXTAUTH_SECRET
   - variable: AUTH_SECRET
