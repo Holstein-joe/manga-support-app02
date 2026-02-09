@@ -26,7 +26,7 @@ if (isCodespaces) {
         // unset localhost so NextAuth uses the Host header (trustHost: true).
         // This is crucial because .env often has NEXTAUTH_URL=http://localhost:3000
         if (process.env.NEXTAUTH_URL?.includes('localhost')) {
-            console.log(`[Codespaces] Unsetting local NEXTAUTH_URL '${process.env.NEXTAUTH_URL}' to allow host header detection via trustHost.`);
+            console.log(`[Codespaces] Unsetting local NEXTAUTH_URL '''${process.env.NEXTAUTH_URL}''' to allow host header detection via trustHost.`);
             delete process.env.NEXTAUTH_URL;
         }
     }
@@ -80,13 +80,6 @@ export const authOptions: NextAuthOptions = {
         },
     },
     callbacks: {
-        signIn: async ({ user }) => {
-            const allowedEmail = process.env.ALLOWED_EMAIL;
-            if (allowedEmail && user.email !== allowedEmail) {
-                return false; // Deny sign in
-            }
-            return true; // Allow sign in
-        },
         session: async ({ session, user }) => {
             if (session.user) {
                 (session.user as any).id = user.id;
