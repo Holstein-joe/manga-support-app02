@@ -39,32 +39,6 @@ export const authOptions: NextAuthOptions = {
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         }),
-        ...(process.env.NODE_ENV === 'development' ? [
-            {
-                id: 'credentials',
-                name: 'Dev Login',
-                type: 'credentials',
-                credentials: {},
-                authorize: async () => {
-                    // Return a mock user for development
-                    // This email should match ALLOWED_EMAIL if set, or just be valid
-                    const devEmail = process.env.ALLOWED_EMAIL || "dev@example.com";
-
-                    // Find or create the dev user in the DB to ensure ID exists
-                    let user = await prisma.user.findUnique({ where: { email: devEmail } });
-                    if (!user) {
-                        user = await prisma.user.create({
-                            data: {
-                                email: devEmail,
-                                name: "Dev User",
-                                image: "https://placehold.co/100x100?text=Dev",
-                            }
-                        });
-                    }
-                    return user;
-                }
-            } as any
-        ] : []),
     ],
     secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
     useSecureCookies: process.env.NODE_ENV === "production",

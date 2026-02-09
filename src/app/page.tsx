@@ -49,15 +49,6 @@ function LandingPage() {
             <LogIn className="mr-3 h-5 w-5" />
             Googleでログインして始める
           </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => signIn("credentials", { callbackUrl: "/" })}
-            className="h-14 px-8 text-lg font-bold bg-zinc-800 text-white hover:bg-zinc-700 mt-4 w-full"
-          >
-            <LogIn className="mr-3 h-5 w-5" />
-            Dev Login (開発用)
-          </Button>
           <p className="text-zinc-600 text-xs mt-4">
             登録は無料です。クレジットカードは不要です。
           </p>
