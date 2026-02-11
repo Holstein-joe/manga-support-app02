@@ -5,14 +5,15 @@ build:
   env:
     # This is the database connection string for the build process (e.g., prisma migrate).
     # It uses a Cloud SQL instance connection name for secure, internal access.
+    # The password has been URL-encoded to handle special characters.
     - variable: DATABASE_URL
-      value: "postgresql://postgres:xHm;Jy>Tby#>e@localhost/manga-app-db-instance?host=/cloudsql/aozu-c7bf0:asia-east1:manga-app-db-instance"
+      value: "postgresql://postgres:xHm%3BJy%3ETby%23%3Ee@localhost/manga-app-db-instance?host=/cloudsql/aozu-c7bf0:asia-east1:manga-app-db-instance"
 run:
   env:
     # This is the database connection string for the application at runtime.
-    # It also uses the secure Cloud SQL instance connection name.
+    # It also uses the secure Cloud SQL instance connection name with an encoded password.
     - variable: DATABASE_URL
-      value: "postgresql://postgres:xHm;Jy>Tby#>e@localhost/manga-app-db-instance?host=/cloudsql/aozu-c7bf0:asia-east1:manga-app-db-instance"
+      value: "postgresql://postgres:xHm%3BJy%3ETby%23%3Ee@localhost/manga-app-db-instance?host=/cloudsql/aozu-c7bf0:asia-east1:manga-app-db-instance"
     - variable: NEXTAUTH_SECRET
       secret: NEXTAUTH_SECRET
     - variable: GOOGLE_CLIENT_ID
