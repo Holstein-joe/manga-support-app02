@@ -1,0 +1,15 @@
+[00:00:34.277] Server  LOG     ✓ Ready in 12.9s
+[00:00:37.293] Server  LOG     ○ Compiling / ...
+[00:00:43.617] Server  WARN    ⚠ Unsupported metadata viewport is configured in metadata export in /. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+[00:00:44.278] Server  WARN    ⚠ Cross origin request detected from 9000-firebase-aozu-1770614924422.cluster-73qgvk7hjjadkrjeyexca5ivva.cloudworkstations.dev to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[00:00:46.767] Server  WARN    [next-auth][warn][NEXTAUTH_URL] "\nhttps://next-auth.js.org/warnings#nextauth_url"
+[00:00:46.768] Server  WARN    [next-auth][warn][NO_SECRET] "\nhttps://next-auth.js.org/warnings#no_secret"
+[00:24:37.209] Server  LOG     ✓ Compiled in 1205ms
+[00:56:20.295] Server  LOG       Reload env: .env
+[00:56:21.879] Server  LOG       Reload env: .env
+[00:56:26.074] Server  LOG       Reload env: .env
+[00:58:43.850] Server  LOG       Reload env: .env
+[00:58:45.459] Server  LOG       Reload env: .env
+[01:01:15.848] Server  LOG       Reload env: .env

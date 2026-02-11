@@ -1,0 +1,19 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/auth/[...nextauth]/route": "/api/auth/[...nextauth]",
+  "/api/backup/route": "/api/backup",
+  "/api/projects/[id]/episodes/[episodeId]/route": "/api/projects/[id]/episodes/[episodeId]",
+  "/api/projects/[id]/route": "/api/projects/[id]",
+  "/api/projects/route": "/api/projects",
+  "/characters/[id]/page": "/characters/[id]",
+  "/characters/page": "/characters",
+  "/favicon.ico/route": "/favicon.ico",
+  "/page": "/",
+  "/projects/[id]/characters/[charId]/page": "/projects/[id]/characters/[charId]",
+  "/projects/[id]/characters/page": "/projects/[id]/characters",
+  "/projects/[id]/episodes/[episodeId]/page": "/projects/[id]/episodes/[episodeId]",
+  "/projects/[id]/page": "/projects/[id]",
+  "/projects/new/page": "/projects/new",
+  "/settings/page": "/settings"
+}
