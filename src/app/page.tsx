@@ -13,6 +13,7 @@ import { useSession, signIn } from "next-auth/react";
 function LandingPage() {
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-4 text-center text-white overflow-hidden relative">
+      <h1 className="absolute top-4 left-4 text-2xl font-bold text-yellow-400">バージョン: 5.0 (最終修正版)</h1>
       {/* Background Gradients */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-blue-900/20 rounded-full blur-[100px]" />
