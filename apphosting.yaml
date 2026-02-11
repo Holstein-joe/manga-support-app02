@@ -1,21 +1,26 @@
+
 kind: "AppStack"
 schemaVersion: "v1"
 build:
   env:
+    # This is the database connection string for the build process (e.g., prisma migrate).
+    # It uses a Cloud SQL instance connection name for secure, internal access.
     - variable: DATABASE_URL
-      value: "postgresql://neondb_owner:npg_wBE71mlSJRcX@ep-weathered-bread-a18askry-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
-env:
-  - variable: NEXTAUTH_SECRET
-    secret: NEXTAUTH_SECRET
-  - variable: AUTH_SECRET
-    secret: NEXTAUTH_SECRET
-  - variable: NEXTAUTH_URL
-    value: "https://manga-support-app02--aozu-c7bf0.us-east4.hosted.app"
-  - variable: NEXTAUTH_URL_INTERNAL
-    value: "https://manga-support-app02--aozu-c7bf0.us-east4.hosted.app"
-  - variable: AUTH_TRUST_HOST
-    value: "true"
-  - variable: GOOGLE_CLIENT_ID
-    secret: GOOGLE_CLIENT_ID
-  - variable: GOOGLE_CLIENT_SECRET
-    secret: GOOGLE_CLIENT_SECRET
+      value: "postgresql://postgres:xHm;Jy>Tby#>e@localhost/manga-app-db-instance?host=/cloudsql/aozu-c7bf0:asia-east1:manga-app-db-instance"
+run:
+  env:
+    # This is the database connection string for the application at runtime.
+    # It also uses the secure Cloud SQL instance connection name.
+    - variable: DATABASE_URL
+      value: "postgresql://postgres:xHm;Jy>Tby#>e@localhost/manga-app-db-instance?host=/cloudsql/aozu-c7bf0:asia-east1:manga-app-db-instance"
+    - variable: NEXTAUTH_SECRET
+      secret: NEXTAUTH_SECRET
+    - variable: GOOGLE_CLIENT_ID
+      secret: GOOGLE_CLIENT_ID
+    - variable: GOOGLE_CLIENT_SECRET
+      secret: GOOGLE_CLIENT_SECRET
+    # These variables are standard for NextAuth on App Hosting.
+    - variable: NEXTAUTH_URL
+      value: "https://manga-support-app02--aozu-c7bf0.us-east4.hosted.app"
+    - variable: AUTH_TRUST_HOST
+      value: "true"
