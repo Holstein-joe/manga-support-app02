@@ -1,19 +1,15 @@
-
 kind: "AppStack"
 schemaVersion: "v1"
 build:
   env:
-    # This is the database connection string for the build process (e.g., prisma migrate).
-    # It uses a Cloud SQL instance connection name for secure, internal access.
-    # The password has been URL-encoded to handle special characters.
+    # DATABASE_URL is now fetched from Secret Manager to avoid parsing issues.
     - variable: DATABASE_URL
-      value: "postgresql://postgres:xHm%3BJy%3ETby%23%3Ee@localhost/manga-app-db-instance?host=/cloudsql/aozu-c7bf0:asia-east1:manga-app-db-instance"
+      secret: DATABASE_URL_SECRET
 run:
   env:
-    # This is the database connection string for the application at runtime.
-    # It also uses the secure Cloud SQL instance connection name with an encoded password.
+    # DATABASE_URL is also fetched from Secret Manager for runtime.
     - variable: DATABASE_URL
-      value: "postgresql://postgres:xHm%3BJy%3ETby%23%3Ee@localhost/manga-app-db-instance?host=/cloudsql/aozu-c7bf0:asia-east1:manga-app-db-instance"
+      secret: DATABASE_URL_SECRET
     - variable: NEXTAUTH_SECRET
       secret: NEXTAUTH_SECRET
     - variable: GOOGLE_CLIENT_ID
